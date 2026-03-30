@@ -15,6 +15,22 @@ st.set_page_config(
 )
 
 # =========================================================
+# RENKLER
+# =========================================================
+PRIMARY_GREEN = "#22c55e"
+SOFT_YELLOW = "#facc15"
+SOFT_BLUE = "#38bdf8"
+SOFT_ORANGE = "#f59e0b"
+SOFT_CYAN = "#06b6d4"
+SOFT_INDIGO = "#6366f1"
+SOFT_PINK = "#f472b6"
+SOFT_EMERALD = "#10b981"
+TEXT_DARK = "#0f172a"
+TEXT_MID = "#334155"
+TEXT_SOFT = "#475569"
+GRID_COLOR = "rgba(148,163,184,0.16)"
+
+# =========================================================
 # MAPPING'LER
 # =========================================================
 CINSIYET_MAP = {
@@ -64,6 +80,13 @@ HBS_KOD5_MAP = {
     6300: "Hastane hizmetleri"
 }
 
+MEDENI_DURUM_MAP = {
+    1: "Hiç evlenmedi",
+    2: "Evli",
+    3: "Boşandı",
+    4: "Eşi öldü"
+}
+
 # =========================================================
 # CSS
 # =========================================================
@@ -71,180 +94,251 @@ st.markdown("""
 <style>
     .stApp {
         background:
-            radial-gradient(circle at top left, rgba(57,255,20,0.10), transparent 22%),
-            radial-gradient(circle at top right, rgba(239,255,0,0.10), transparent 20%),
-            radial-gradient(circle at bottom right, rgba(0,255,156,0.08), transparent 24%),
-            linear-gradient(135deg, #030504 0%, #06100a 45%, #07110c 100%);
-        color: #f8fff4;
+            radial-gradient(circle at 8% 8%, rgba(56, 189, 248, 0.20), transparent 20%),
+            radial-gradient(circle at 92% 10%, rgba(250, 204, 21, 0.20), transparent 22%),
+            radial-gradient(circle at 85% 85%, rgba(34, 197, 94, 0.16), transparent 22%),
+            radial-gradient(circle at 15% 88%, rgba(99, 102, 241, 0.14), transparent 18%),
+            linear-gradient(135deg, #f7fbff 0%, #f4fff8 38%, #fffef6 72%, #f7fbff 100%);
+        color: #14213d;
     }
 
     .block-container {
-        max-width: 1500px;
-        padding-top: 1rem;
-        padding-bottom: 2rem;
+        max-width: 1520px;
+        padding-top: 0.85rem !important;
+        padding-bottom: 2.3rem;
         padding-left: 1.6rem;
         padding-right: 1.6rem;
     }
 
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(4,8,6,0.98) 0%, rgba(7,14,10,0.98) 100%);
-        border-right: 1px solid rgba(124,255,0,0.10);
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        height: 0rem !important;
     }
 
-    [data-testid="stSidebar"] * {
-        color: #f7ffe9 !important;
+    div[data-testid="stToolbar"] {
+        top: 0.35rem !important;
+        right: 0.55rem !important;
+    }
+
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+
+    section[data-testid="stSidebar"] {
+        background:
+            linear-gradient(180deg, rgba(248,250,252,0.97) 0%, rgba(242,247,255,0.96) 100%) !important;
+        border-right: 1px solid rgba(148, 163, 184, 0.18);
+        width: 275px !important;
+        min-width: 275px !important;
+        box-shadow: 6px 0 30px rgba(148,163,184,0.08);
+    }
+
+    section[data-testid="stSidebar"] > div {
+        padding-top: 0.8rem !important;
+    }
+
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
+
+    button[kind="header"] {
+        display: none !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] {
+        display: none !important;
+    }
+
+    [data-testid="stSidebarNavCollapseButton"] {
+        display: none !important;
     }
 
     [data-testid="stSidebarNav"] {
-        background: transparent !important;
+        padding-top: 0.2rem !important;
+    }
+
+    [data-testid="stSidebarNav"] a {
+        border-radius: 14px !important;
+        margin-bottom: 0.45rem !important;
+        padding: 0.62rem 0.85rem !important;
+        color: #0f172a !important;
+        transition: all 0.2s ease;
+    }
+
+    [data-testid="stSidebarNav"] a:hover {
+        background: rgba(219, 234, 254, 0.60) !important;
+    }
+
+    [data-testid="stSidebarNav"] a[aria-current="page"] {
+        background: linear-gradient(135deg, rgba(219,234,254,0.95), rgba(224,231,255,0.88)) !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        box-shadow: 0 8px 18px rgba(99,102,241,0.10);
     }
 
     .hero-card {
+        position: relative;
+        overflow: hidden;
         background:
-            linear-gradient(135deg, rgba(8,18,12,0.96) 0%, rgba(24,50,20,0.92) 40%, rgba(82,255,0,0.24) 75%, rgba(239,255,0,0.18) 100%);
-        border: 1px solid rgba(124,255,0,0.16);
-        border-radius: 28px;
-        padding: 30px 32px;
+            linear-gradient(135deg, rgba(255,255,255,0.78) 0%, rgba(240,249,255,0.90) 30%, rgba(254,252,232,0.86) 65%, rgba(236,253,245,0.84) 100%);
+        border: 1px solid rgba(255,255,255,0.65);
+        border-radius: 30px;
+        padding: 30px 34px;
         box-shadow:
-            0 0 0 1px rgba(255,255,255,0.02),
-            0 0 24px rgba(57,255,20,0.12),
-            0 0 46px rgba(239,255,0,0.06);
+            0 20px 55px rgba(148, 163, 184, 0.13),
+            0 8px 28px rgba(56, 189, 248, 0.08),
+            inset 0 1px 0 rgba(255,255,255,0.85);
+        margin-top: 0.1rem;
         margin-bottom: 1rem;
+        backdrop-filter: blur(14px);
+    }
+
+    .hero-card::before {
+        content: "";
+        position: absolute;
+        top: -80px;
+        right: -80px;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(56,189,248,0.18) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .hero-card::after {
+        content: "";
+        position: absolute;
+        bottom: -90px;
+        left: -60px;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(250,204,21,0.15) 0%, transparent 70%);
+        border-radius: 50%;
     }
 
     .hero-title {
-        font-size: 2.15rem;
+        position: relative;
+        z-index: 2;
+        font-size: 2.2rem;
         font-weight: 900;
-        color: #fafff2;
-        margin-bottom: 0.45rem;
-        line-height: 1.08;
-        text-shadow: 0 0 12px rgba(124,255,0,0.16);
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        line-height: 1.06;
+        letter-spacing: -0.5px;
     }
 
     .hero-subtitle {
+        position: relative;
+        z-index: 2;
         font-size: 1rem;
-        color: rgba(240,255,225,0.92);
-        line-height: 1.6;
+        color: #334155;
+        line-height: 1.7;
         max-width: 980px;
     }
 
     .section-title {
-        font-size: 1.22rem;
-        font-weight: 850;
-        color: #f7ffe9;
-        margin-top: 0.15rem;
-        margin-bottom: 0.85rem;
-    }
-
-    .mini-card {
-        background: linear-gradient(135deg, rgba(5,13,8,0.96), rgba(9,20,12,0.92));
-        border: 1px solid rgba(124,255,0,0.12);
-        border-radius: 20px;
-        padding: 14px 16px;
-        box-shadow: 0 0 14px rgba(57,255,20,0.05);
-    }
-
-    .mini-label {
-        font-size: 0.88rem;
-        color: #d8f7c5;
-        margin-bottom: 0.4rem;
-    }
-
-    .mini-value {
-        font-size: 1.8rem;
+        font-size: 1.2rem;
         font-weight: 900;
-        color: #fafff2;
-        text-shadow: 0 0 8px rgba(124,255,0,0.10);
+        color: #0f172a;
+        margin-top: 0.7rem;
+        margin-bottom: 0.9rem;
+        letter-spacing: -0.2px;
     }
 
-    .kpi-card {
-        background: linear-gradient(135deg, rgba(5,10,7,0.98), rgba(9,16,10,0.94));
-        border: 1px solid rgba(124,255,0,0.10);
-        border-radius: 22px;
-        padding: 18px 20px;
-        box-shadow:
-            0 0 0 1px rgba(255,255,255,0.01),
-            0 0 18px rgba(57,255,20,0.05);
-        min-height: 108px;
-    }
-
-    .kpi-label {
-        font-size: 0.92rem;
-        color: #d3f9be;
-        margin-bottom: 0.45rem;
-    }
-
-    .kpi-value {
-        font-size: 1.9rem;
-        font-weight: 900;
-        color: #fbfff3;
-        line-height: 1.05;
-    }
-
-    .panel-card {
-        background: linear-gradient(135deg, rgba(3,8,5,0.98), rgba(7,13,8,0.95));
-        border: 1px solid rgba(124,255,0,0.08);
+    .mini-card, .kpi-card {
+        background:
+            linear-gradient(135deg, rgba(255,255,255,0.78), rgba(255,255,255,0.58));
+        border: 1px solid rgba(255,255,255,0.72);
         border-radius: 24px;
-        padding: 16px 16px 8px 16px;
+        padding: 19px 21px;
         box-shadow:
-            0 0 0 1px rgba(255,255,255,0.01),
-            0 0 18px rgba(57,255,20,0.04);
-        margin-bottom: 1rem;
+            0 16px 34px rgba(148,163,184,0.10),
+            0 4px 18px rgba(56,189,248,0.04);
+        backdrop-filter: blur(12px);
+    }
+
+    .mini-label, .kpi-label {
+        font-size: 0.92rem;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .mini-value, .kpi-value {
+        font-size: 1.95rem;
+        font-weight: 900;
+        color: #0f172a;
+        line-height: 1.03;
+        letter-spacing: -0.6px;
     }
 
     .panel-title {
         font-size: 1.05rem;
-        font-weight: 800;
-        color: #f7ffe9;
-        margin-bottom: 0.6rem;
+        font-weight: 850;
+        color: #0f172a;
+        margin-bottom: 0.65rem;
     }
 
     .insight-card {
-        background: linear-gradient(135deg, rgba(12,22,8,0.92), rgba(30,48,10,0.70));
-        border: 1px solid rgba(239,255,0,0.10);
-        border-left: 5px solid #39FF14;
-        border-radius: 20px;
-        padding: 16px 18px;
-        color: #f8fff2;
-        line-height: 1.7;
-        box-shadow: 0 0 20px rgba(239,255,0,0.04);
+        background:
+            linear-gradient(135deg, rgba(255,255,255,0.84), rgba(254,249,195,0.76), rgba(224,242,254,0.72));
+        border: 1px solid rgba(250, 204, 21, 0.24);
+        border-left: 5px solid #facc15;
+        border-radius: 22px;
+        padding: 18px 20px;
+        color: #1e293b;
+        line-height: 1.8;
+        box-shadow:
+            0 15px 32px rgba(250,204,21,0.10),
+            0 6px 20px rgba(56,189,248,0.05);
+        margin-bottom: 0.8rem;
+        backdrop-filter: blur(10px);
     }
 
-    .sidebar-title {
-        font-size: 1.45rem;
-        font-weight: 900;
-        color: #fbfff2;
-        margin-bottom: 1rem;
+    [data-testid="stExpander"] details {
+        background: rgba(255,255,255,0.60) !important;
+        border: 1px solid rgba(148,163,184,0.14) !important;
+        border-radius: 18px !important;
+        overflow: hidden !important;
+        box-shadow: 0 12px 28px rgba(148,163,184,0.08) !important;
+        backdrop-filter: blur(10px) !important;
+    }
+
+    [data-testid="stExpander"] summary {
+        background: linear-gradient(135deg, rgba(239,246,255,0.82), rgba(254,249,195,0.56)) !important;
+        color: #0f172a !important;
+        font-weight: 800 !important;
+    }
+
+    div[data-testid="stDataEditor"] {
+        background: rgba(248,252,255,0.92) !important;
+        border: 1px solid rgba(148,163,184,0.16) !important;
+        border-radius: 16px !important;
+        padding: 6px !important;
+    }
+
+    .stSelectbox label,
+    .stSlider label,
+    .stRadio label,
+    .stMarkdown,
+    p, span {
+        color: #0f172a !important;
+    }
+
+    .stSelectbox > div > div,
+    .stMultiSelect > div > div,
+    .stNumberInput > div > div,
+    .stTextInput > div > div {
+        border-radius: 14px !important;
     }
 
     div[data-baseweb="select"] > div {
-        background: rgba(6,12,8,0.96) !important;
-        border: 1px solid rgba(124,255,0,0.10) !important;
-        border-radius: 14px !important;
-        color: #fbfff2 !important;
+        background: rgba(255,255,255,0.85) !important;
+        border: 1px solid rgba(148,163,184,0.16) !important;
+        box-shadow: 0 8px 18px rgba(148,163,184,0.05) !important;
     }
 
     .stSlider [data-baseweb="slider"] {
-        padding-top: 0.25rem;
-    }
-
-    .stCheckbox label, .stRadio label {
-        color: #f7ffe9 !important;
-    }
-
-    .stRadio > div {
-        gap: 1rem;
-    }
-
-    [data-testid="stDataFrame"] {
-        background: rgba(6,12,8,0.98) !important;
-        border: 1px solid rgba(124,255,0,0.08) !important;
-        border-radius: 18px !important;
-        overflow: hidden !important;
-    }
-
-    [data-testid="stDataFrame"] * {
-        color: #e9ffe0 !important;
+        padding-top: 0.3rem !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -255,10 +349,24 @@ st.markdown("""
 @st.cache_data
 def get_data():
     df = load_data().copy()
-    numeric_cols = ["DEGER", "YAS", "CINSIYET", "OKUL_BITEN", "SAGLIK_SIGORTA_1", "HBS_KOD5"]
+
+    numeric_cols = [
+        "DEGER", "YAS", "CINSIYET", "OKUL_BITEN",
+        "SAGLIK_SIGORTA_1", "HBS_KOD5", "GELIR_TOPLAM", "MEDENI_DURUM"
+    ]
+
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    if "GELIR_TOPLAM" in df.columns:
+        df.loc[df["GELIR_TOPLAM"] < 0, "GELIR_TOPLAM"] = np.nan
+        df["LOG_GELIR_TOPLAM"] = np.where(
+            df["GELIR_TOPLAM"].notna(),
+            np.log1p(df["GELIR_TOPLAM"]),
+            np.nan
+        )
+
     return df
 
 def map_label(value, mapping):
@@ -269,10 +377,17 @@ def map_label(value, mapping):
     except Exception:
         return str(value)
 
-def build_single_select_options(series, mapping):
-    raw_values = sorted(series.dropna().unique().tolist())
-    labels = [map_label(v, mapping) for v in raw_values]
-    reverse = {map_label(v, mapping): v for v in raw_values}
+def build_single_select_options(series, mapping=None):
+    series = series.dropna()
+    raw_values = sorted(series.unique().tolist(), key=lambda x: str(x))
+
+    if mapping:
+        labels = [map_label(v, mapping) for v in raw_values]
+        reverse = {map_label(v, mapping): v for v in raw_values}
+    else:
+        labels = [str(v) for v in raw_values]
+        reverse = {str(v): v for v in raw_values}
+
     return ["Tümü"] + labels, reverse
 
 def shorten_text(text, limit=28):
@@ -280,74 +395,138 @@ def shorten_text(text, limit=28):
     return text if len(text) <= limit else text[:limit - 3] + "..."
 
 def safe_mean(df, group_col, value_col):
+    clean_df = df[[group_col, value_col]].dropna().copy()
+    if clean_df.empty:
+        return pd.DataFrame(columns=[group_col, value_col])
+
     return (
-        df.groupby(group_col, dropna=False)[value_col]
+        clean_df.groupby(group_col, dropna=False)[value_col]
         .mean()
         .reset_index()
         .sort_values(value_col, ascending=False)
     )
 
 def style_figure(fig, height, title=None, x_title="", y_title=""):
-    fig.update_layout(
+    layout_dict = dict(
         height=height,
-        plot_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(255,255,255,0.14)",
         paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=10, r=10, t=50, b=10),
-        title=title,
-        title_font_size=18,
-        title_font_color="#f7ffe9",
-        font=dict(color="#dff7cf"),
+        margin=dict(l=10, r=10, t=55 if title else 15, b=10),
+        font=dict(color=TEXT_MID, size=13),
         xaxis_title=x_title,
         yaxis_title=y_title
     )
-    fig.update_xaxes(gridcolor="rgba(124,255,0,0.10)", zeroline=False)
-    fig.update_yaxes(gridcolor="rgba(124,255,0,0.10)", zeroline=False)
+
+    if title is not None and str(title).strip() != "" and str(title).lower() != "undefined":
+        layout_dict["title"] = title
+        layout_dict["title_font_size"] = 18
+        layout_dict["title_font_color"] = TEXT_DARK
+
+    fig.update_layout(**layout_dict)
+
+    fig.update_xaxes(
+        gridcolor=GRID_COLOR,
+        zeroline=False,
+        tickfont=dict(color=TEXT_SOFT, size=12),
+        title_font=dict(color=TEXT_MID, size=13)
+    )
+    fig.update_yaxes(
+        gridcolor=GRID_COLOR,
+        zeroline=False,
+        tickfont=dict(color=TEXT_SOFT, size=12),
+        title_font=dict(color=TEXT_MID, size=13)
+    )
+
     return fig
+
+def fmt_number(value, digits=2):
+    if pd.isna(value):
+        return "-"
+    return f"{value:,.{digits}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+def fmt_int(value):
+    if pd.isna(value):
+        return "-"
+    return f"{int(value):,}".replace(",", ".")
 
 # =========================================================
 # VERİ
 # =========================================================
 df = get_data()
 filtered_df = df.copy()
+active_filters = 0
 
 # =========================================================
 # SIDEBAR
 # =========================================================
-st.sidebar.markdown('<div class="sidebar-title">Filtreler</div>', unsafe_allow_html=True)
+with st.sidebar:
+    st.title("Filtreler")
+    st.caption("Veriyi sosyal, ekonomik ve sağlık profiline göre filtreleyebilirsin.")
 
-active_filters = 0
+    if "CINSIYET" in filtered_df.columns:
+        gender_options, gender_reverse = build_single_select_options(filtered_df["CINSIYET"], CINSIYET_MAP)
+        selected_gender = st.selectbox("Cinsiyet", gender_options)
+        if selected_gender != "Tümü":
+            filtered_df = filtered_df[filtered_df["CINSIYET"] == gender_reverse[selected_gender]]
+            active_filters += 1
 
-if "CINSIYET" in filtered_df.columns:
-    gender_options, gender_reverse = build_single_select_options(filtered_df["CINSIYET"], CINSIYET_MAP)
-    selected_gender = st.sidebar.selectbox("Cinsiyet", gender_options)
-    if selected_gender != "Tümü":
-        filtered_df = filtered_df[filtered_df["CINSIYET"] == gender_reverse[selected_gender]]
-        active_filters += 1
+    if "YAS" in filtered_df.columns and filtered_df["YAS"].notna().any():
+        min_age = int(filtered_df["YAS"].min())
+        max_age = int(filtered_df["YAS"].max())
+        selected_age = st.slider("Yaş Aralığı", min_age, max_age, (min_age, max_age))
+        filtered_df = filtered_df[
+            filtered_df["YAS"].between(selected_age[0], selected_age[1], inclusive="both")
+        ]
+        if selected_age != (min_age, max_age):
+            active_filters += 1
 
-if "YAS" in filtered_df.columns and filtered_df["YAS"].notna().any():
-    min_age = int(filtered_df["YAS"].min())
-    max_age = int(filtered_df["YAS"].max())
-    selected_age = st.sidebar.slider("Yaş Aralığı", min_age, max_age, (min_age, max_age))
-    filtered_df = filtered_df[
-        (filtered_df["YAS"] >= selected_age[0]) &
-        (filtered_df["YAS"] <= selected_age[1])
-    ]
-    if selected_age != (min_age, max_age):
-        active_filters += 1
+    if "OKUL_BITEN" in filtered_df.columns:
+        edu_options, edu_reverse = build_single_select_options(filtered_df["OKUL_BITEN"], OKUL_BITEN_MAP)
+        selected_edu = st.selectbox("Eğitim Durumu", edu_options)
+        if selected_edu != "Tümü":
+            filtered_df = filtered_df[filtered_df["OKUL_BITEN"] == edu_reverse[selected_edu]]
+            active_filters += 1
 
-if "OKUL_BITEN" in filtered_df.columns:
-    edu_options, edu_reverse = build_single_select_options(filtered_df["OKUL_BITEN"], OKUL_BITEN_MAP)
-    selected_edu = st.sidebar.selectbox("Eğitim Durumu", edu_options)
-    if selected_edu != "Tümü":
-        filtered_df = filtered_df[filtered_df["OKUL_BITEN"] == edu_reverse[selected_edu]]
-        active_filters += 1
+    if "SAGLIK_SIGORTA_1" in filtered_df.columns:
+        ins_options, ins_reverse = build_single_select_options(filtered_df["SAGLIK_SIGORTA_1"], SAGLIK_SIGORTA_MAP)
+        selected_ins = st.selectbox("Sağlık Sigortası", ins_options)
+        if selected_ins != "Tümü":
+            filtered_df = filtered_df[filtered_df["SAGLIK_SIGORTA_1"] == ins_reverse[selected_ins]]
+            active_filters += 1
 
-if "SAGLIK_SIGORTA_1" in filtered_df.columns:
-    ins_options, ins_reverse = build_single_select_options(filtered_df["SAGLIK_SIGORTA_1"], SAGLIK_SIGORTA_MAP)
-    selected_ins = st.sidebar.selectbox("Sağlık Sigortası", ins_options)
-    if selected_ins != "Tümü":
-        filtered_df = filtered_df[filtered_df["SAGLIK_SIGORTA_1"] == ins_reverse[selected_ins]]
-        active_filters += 1
+    if "MEDENI_DURUM" in filtered_df.columns:
+        medeni_options, medeni_reverse = build_single_select_options(filtered_df["MEDENI_DURUM"], MEDENI_DURUM_MAP)
+        selected_medeni = st.selectbox("Medeni Durum", medeni_options)
+        if selected_medeni != "Tümü":
+            filtered_df = filtered_df[filtered_df["MEDENI_DURUM"] == medeni_reverse[selected_medeni]]
+            active_filters += 1
+
+    if "LOG_GELIR_TOPLAM" in filtered_df.columns and filtered_df["LOG_GELIR_TOPLAM"].notna().any():
+        log_income_min = float(filtered_df["LOG_GELIR_TOPLAM"].min())
+        log_income_max = float(filtered_df["LOG_GELIR_TOPLAM"].max())
+
+        log_income_min_r = round(log_income_min, 2)
+        log_income_max_r = round(log_income_max, 2)
+
+        selected_log_gelir = st.slider(
+            "Gelir Aralığı (Log Ölçek)",
+            min_value=log_income_min_r,
+            max_value=log_income_max_r,
+            value=(log_income_min_r, log_income_max_r)
+        )
+
+        if selected_log_gelir != (log_income_min_r, log_income_max_r):
+            active_filters += 1
+
+        filtered_df = filtered_df[
+            filtered_df["LOG_GELIR_TOPLAM"].between(
+                selected_log_gelir[0], selected_log_gelir[1], inclusive="both"
+            )
+        ]
+
+        gelir_alt = int(np.expm1(selected_log_gelir[0]))
+        gelir_ust = int(np.expm1(selected_log_gelir[1]))
+        st.caption(f"Yaklaşık gelir aralığı: {fmt_int(gelir_alt)} - {fmt_int(gelir_ust)} TL")
 
 # =========================================================
 # HERO
@@ -356,8 +535,8 @@ st.markdown("""
 <div class="hero-card">
     <div class="hero-title">TÜİK Sağlık Harcaması Dashboard</div>
     <div class="hero-subtitle">
-        Sağlık harcama kalemleri ile demografik değişkenler arasındaki ilişkiyi etkileşimli filtreler,
-        istatistiki özetler ve karşılaştırmalı görselleştirmelerle inceleyen neon lime temalı analitik panel.
+        Sağlık harcama kalemleri ile sosyal ve ekonomik değişkenler arasındaki ilişkiyi;
+        etkileşimli filtreler, istatistiki özetler ve premium görselleştirmelerle inceleyen analitik panel.
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -372,7 +551,7 @@ with top1:
         f"""
         <div class="mini-card">
             <div class="mini-label">Filtreler sonrası analiz edilen toplam gözlem</div>
-            <div class="mini-value">{len(filtered_df):,}</div>
+            <div class="mini-value">{fmt_int(len(filtered_df))}</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -399,24 +578,25 @@ if "DEGER" in filtered_df.columns and filtered_df["DEGER"].notna().any():
     c1, c2, c3, c4 = st.columns(4)
 
     kpis = [
-        ("Ortalama Harcama", f"{deger.mean():,.2f}"),
-        ("Medyan", f"{deger.median():,.2f}"),
-        ("Std. Sapma", f"{deger.std():,.2f}"),
-        ("Gözlem Sayısı", f"{deger.count():,}")
+        ("Ortalama Harcama", fmt_number(deger.mean())),
+        ("Medyan", fmt_number(deger.median())),
+        ("Std. Sapma", fmt_number(deger.std())),
+        ("Gözlem Sayısı", fmt_int(deger.count()))
     ]
 
     for col, (label, value) in zip([c1, c2, c3, c4], kpis):
-        col.markdown(
-            f"""
-            <div class="kpi-card">
-                <div class="kpi-label">{label}</div>
-                <div class="kpi-value">{value}</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        with col:
+            st.markdown(
+                f"""
+                <div class="kpi-card">
+                    <div class="kpi-label">{label}</div>
+                    <div class="kpi-value">{value}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
 # =========================================================
 # ANA ANALİZ
@@ -424,8 +604,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 main_left, main_right = st.columns([1.7, 1])
 
 with main_left:
-    st.markdown('<div class="section-title">Sağlık Harcama Kalemi Analizi</div>', unsafe_allow_html=True)
-    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Sağlık Harcama Kırılımı</div>', unsafe_allow_html=True)
 
     ctrl1, ctrl2 = st.columns([2, 1])
 
@@ -439,9 +618,10 @@ with main_left:
     with ctrl2:
         top_n = st.slider("Top N", 5, 12, 8)
 
-    if "HBS_KOD5" in filtered_df.columns:
+    if "HBS_KOD5" in filtered_df.columns and "DEGER" in filtered_df.columns:
         temp = filtered_df.copy()
         temp["HARCAMA_KALEMI"] = temp["HBS_KOD5"].apply(lambda x: map_label(x, HBS_KOD5_MAP))
+        temp = temp.dropna(subset=["HARCAMA_KALEMI"])
 
         if metric_type == "Toplam Harcama":
             grouped = (
@@ -452,8 +632,8 @@ with main_left:
                 .head(top_n)
             )
             value_col = "DEGER"
-            title = "Sağlık Harcama Kalemlerine Göre Toplam Harcama"
-            color = "#39FF14"
+            title = "Kalemlere Göre Toplam Harcama"
+            color = PRIMARY_GREEN
 
         elif metric_type == "Ortalama Harcama":
             grouped = (
@@ -464,8 +644,8 @@ with main_left:
                 .head(top_n)
             )
             value_col = "DEGER"
-            title = "Sağlık Harcama Kalemlerine Göre Ortalama Harcama"
-            color = "#EFFF00"
+            title = "Kalemlere Göre Ortalama Harcama"
+            color = SOFT_BLUE
 
         else:
             grouped = (
@@ -476,149 +656,186 @@ with main_left:
                 .head(top_n)
             )
             value_col = "FREKANS"
-            title = "Sağlık Harcama Kalemlerine Göre Frekans"
-            color = "#7CFF00"
+            title = "Kalemlere Göre Frekans"
+            color = SOFT_ORANGE
 
-        grouped["KISA"] = grouped["HARCAMA_KALEMI"].apply(shorten_text)
+        if not grouped.empty:
+            grouped["KISA"] = grouped["HARCAMA_KALEMI"].apply(shorten_text)
 
-        fig_main = px.bar(
-            grouped.sort_values(value_col, ascending=True),
-            x=value_col,
-            y="KISA",
-            orientation="h",
-            title=title
-        )
-        fig_main = style_figure(fig_main, 470, title=title)
-        fig_main.update_traces(marker_color=color)
-        fig_main.update_yaxes(showgrid=False)
-        st.plotly_chart(fig_main, use_container_width=True, config={"displayModeBar": False})
-
-    st.markdown('</div>', unsafe_allow_html=True)
+            fig_main = px.bar(
+                grouped.sort_values(value_col, ascending=True),
+                x=value_col,
+                y="KISA",
+                orientation="h"
+            )
+            fig_main = style_figure(fig_main, 470, title=title)
+            fig_main.update_traces(
+                marker_color=color,
+                marker_line_width=0
+            )
+            fig_main.update_yaxes(showgrid=False)
+            fig_main.update_xaxes(showgrid=False)
+            st.plotly_chart(fig_main, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("Bu filtre kombinasyonunda gösterilecek veri bulunamadı.")
 
 with main_right:
-    st.markdown('<div class="section-title">Dağılım Özeti</div>', unsafe_allow_html=True)
-    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Harcama Yoğunluğu</div>', unsafe_allow_html=True)
 
     if "DEGER" in filtered_df.columns and filtered_df["DEGER"].notna().any():
         log_df = filtered_df[filtered_df["DEGER"] > 0].copy()
-        log_df["LOG_DEGER"] = log_df["DEGER"].apply(lambda x: np.log10(x) if x > 0 else None)
+        log_df["LOG_DEGER"] = np.log10(log_df["DEGER"])
 
-        fig_hist = px.histogram(
-            log_df,
-            x="LOG_DEGER",
-            nbins=35,
-            title="Log Ölçekte Harcama Dağılımı"
-        )
-        fig_hist = style_figure(fig_hist, 470, title="Log Ölçekte Harcama Dağılımı", x_title="log10(Harcama)")
-        fig_hist.update_traces(marker_color="#FFD400")
-        fig_hist.update_xaxes(showgrid=False)
-        st.plotly_chart(fig_hist, use_container_width=True, config={"displayModeBar": False})
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# =========================================================
-# DEMOGRAFİK ANALİZ
-# =========================================================
-st.markdown('<div class="section-title">Demografik Analiz</div>', unsafe_allow_html=True)
-
-demo1, demo2 = st.columns(2)
-
-with demo1:
-    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown('<div class="panel-title">Yaş Eğilimi</div>', unsafe_allow_html=True)
-
-    if "YAS" in filtered_df.columns and "DEGER" in filtered_df.columns:
-        age_df = (
-            filtered_df.groupby("YAS", dropna=False)["DEGER"]
-            .mean()
-            .reset_index()
-            .sort_values("YAS")
-        )
-        fig_age = px.line(age_df, x="YAS", y="DEGER")
-        fig_age = style_figure(fig_age, 390, x_title="Yaş")
-        fig_age.update_traces(line=dict(color="#00FF9C", width=3))
-        fig_age.update_xaxes(showgrid=False)
-        st.plotly_chart(fig_age, use_container_width=True, config={"displayModeBar": False})
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with demo2:
-    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown('<div class="panel-title">Cinsiyet Karşılaştırması</div>', unsafe_allow_html=True)
-
-    if "CINSIYET" in filtered_df.columns and "DEGER" in filtered_df.columns:
-        gender_df = safe_mean(filtered_df, "CINSIYET", "DEGER")
-        gender_df["CINSIYET_ETIKET"] = gender_df["CINSIYET"].apply(lambda x: map_label(x, CINSIYET_MAP))
-
-        fig_gender = px.bar(
-            gender_df,
-            x="CINSIYET_ETIKET",
-            y="DEGER"
-        )
-        fig_gender = style_figure(fig_gender, 390)
-        fig_gender.update_traces(marker_color="#EFFF00")
-        fig_gender.update_xaxes(showgrid=False)
-        st.plotly_chart(fig_gender, use_container_width=True, config={"displayModeBar": False})
-
-    st.markdown('</div>', unsafe_allow_html=True)
+        if not log_df.empty:
+            fig_hist = px.histogram(log_df, x="LOG_DEGER", nbins=35)
+            fig_hist = style_figure(
+                fig_hist,
+                470,
+                title="Logaritmik Harcama Dağılımı",
+                x_title="Log10 Harcama"
+            )
+            fig_hist.update_traces(marker_color=SOFT_YELLOW, marker_line_width=0)
+            fig_hist.update_xaxes(showgrid=False)
+            st.plotly_chart(fig_hist, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("Dağılım grafiği için pozitif harcama verisi bulunamadı.")
 
 # =========================================================
-# EĞİTİM / SİGORTA
+# SOSYOEKONOMİK KARŞILAŞTIRMALAR
 # =========================================================
+st.markdown('<div class="section-title">Sosyoekonomik Karşılaştırmalar</div>', unsafe_allow_html=True)
+
 extra1, extra2 = st.columns(2)
 
 with extra1:
-    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown('<div class="panel-title">Eğitim Kırılımı</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">Eğitim Düzeyine Göre Ortalama Harcama</div>', unsafe_allow_html=True)
 
     if "OKUL_BITEN" in filtered_df.columns and "DEGER" in filtered_df.columns:
         edu_df = safe_mean(filtered_df, "OKUL_BITEN", "DEGER")
-        edu_df["EGITIM_ETIKET"] = edu_df["OKUL_BITEN"].apply(lambda x: map_label(x, OKUL_BITEN_MAP))
-        edu_df = edu_df[edu_df["EGITIM_ETIKET"] != "Bilinmiyor"]
-        edu_df["EGITIM_KISA"] = edu_df["EGITIM_ETIKET"].apply(lambda x: shorten_text(x, 32))
 
-        fig_edu = px.bar(
-            edu_df.sort_values("DEGER", ascending=True),
-            x="DEGER",
-            y="EGITIM_KISA",
-            orientation="h"
-        )
-        fig_edu = style_figure(fig_edu, 430)
-        fig_edu.update_traces(marker_color="#7CFF00")
-        fig_edu.update_yaxes(showgrid=False)
-        st.plotly_chart(fig_edu, use_container_width=True, config={"displayModeBar": False})
+        if not edu_df.empty:
+            edu_df["EGITIM_ETIKET"] = edu_df["OKUL_BITEN"].apply(lambda x: map_label(x, OKUL_BITEN_MAP))
+            edu_df = edu_df[edu_df["EGITIM_ETIKET"] != "Bilinmiyor"]
+            edu_df["EGITIM_KISA"] = edu_df["EGITIM_ETIKET"].apply(lambda x: shorten_text(x, 34))
 
-    st.markdown('</div>', unsafe_allow_html=True)
+            fig_edu = px.bar(
+                edu_df.sort_values("DEGER", ascending=True),
+                x="DEGER",
+                y="EGITIM_KISA",
+                orientation="h"
+            )
+            fig_edu = style_figure(fig_edu, 430, x_title="Ortalama Harcama")
+            fig_edu.update_traces(marker_color=SOFT_EMERALD, marker_line_width=0)
+            fig_edu.update_yaxes(showgrid=False)
+            fig_edu.update_xaxes(showgrid=False)
+            st.plotly_chart(fig_edu, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("Eğitim grafiği için veri bulunamadı.")
 
 with extra2:
-    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown('<div class="panel-title">Sigorta Kırılımı</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">Sigorta Türüne Göre Ortalama Harcama</div>', unsafe_allow_html=True)
 
     if "SAGLIK_SIGORTA_1" in filtered_df.columns and "DEGER" in filtered_df.columns:
         ins_df = safe_mean(filtered_df, "SAGLIK_SIGORTA_1", "DEGER")
-        ins_df["SIGORTA_ETIKET"] = ins_df["SAGLIK_SIGORTA_1"].apply(lambda x: map_label(x, SAGLIK_SIGORTA_MAP))
-        ins_df = ins_df[ins_df["SIGORTA_ETIKET"] != "Bilinmiyor"]
-        ins_df["SIGORTA_KISA"] = ins_df["SIGORTA_ETIKET"].apply(lambda x: shorten_text(x, 32))
 
-        fig_ins = px.bar(
-            ins_df.sort_values("DEGER", ascending=True),
-            x="DEGER",
-            y="SIGORTA_KISA",
-            orientation="h"
-        )
-        fig_ins = style_figure(fig_ins, 430)
-        fig_ins.update_traces(marker_color="#F5FF57")
-        fig_ins.update_yaxes(showgrid=False)
-        st.plotly_chart(fig_ins, use_container_width=True, config={"displayModeBar": False})
+        if not ins_df.empty:
+            ins_df["SIGORTA_ETIKET"] = ins_df["SAGLIK_SIGORTA_1"].apply(lambda x: map_label(x, SAGLIK_SIGORTA_MAP))
+            ins_df = ins_df[ins_df["SIGORTA_ETIKET"] != "Bilinmiyor"]
+            ins_df["SIGORTA_KISA"] = ins_df["SIGORTA_ETIKET"].apply(lambda x: shorten_text(x, 34))
 
-    st.markdown('</div>', unsafe_allow_html=True)
+            fig_ins = px.bar(
+                ins_df.sort_values("DEGER", ascending=True),
+                x="DEGER",
+                y="SIGORTA_KISA",
+                orientation="h"
+            )
+            fig_ins = style_figure(fig_ins, 430, x_title="Ortalama Harcama")
+            fig_ins.update_traces(marker_color=SOFT_ORANGE, marker_line_width=0)
+            fig_ins.update_yaxes(showgrid=False)
+            fig_ins.update_xaxes(showgrid=False)
+            st.plotly_chart(fig_ins, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("Sigorta grafiği için veri bulunamadı.")
+
+# =========================================================
+# EKONOMİK VE SOSYAL KIRILIM
+# =========================================================
+st.markdown('<div class="section-title">Ekonomik ve Sosyal Kırılım</div>', unsafe_allow_html=True)
+
+extra3, extra4 = st.columns(2)
+
+with extra3:
+    st.markdown('<div class="panel-title">Medeni Duruma Göre Ortalama Harcama</div>', unsafe_allow_html=True)
+
+    if "MEDENI_DURUM" in filtered_df.columns and "DEGER" in filtered_df.columns:
+        medeni_df = safe_mean(filtered_df, "MEDENI_DURUM", "DEGER")
+
+        if not medeni_df.empty:
+            medeni_df["MEDENI_ETIKET"] = medeni_df["MEDENI_DURUM"].apply(lambda x: map_label(x, MEDENI_DURUM_MAP))
+            medeni_df = medeni_df[medeni_df["MEDENI_ETIKET"] != "Bilinmiyor"]
+
+            fig_medeni = px.bar(
+                medeni_df.sort_values("DEGER", ascending=True),
+                x="DEGER",
+                y="MEDENI_ETIKET",
+                orientation="h"
+            )
+            fig_medeni = style_figure(fig_medeni, 430, x_title="Ortalama Harcama")
+            fig_medeni.update_traces(marker_color=SOFT_INDIGO, marker_line_width=0)
+            fig_medeni.update_yaxes(showgrid=False)
+            fig_medeni.update_xaxes(showgrid=False)
+            st.plotly_chart(fig_medeni, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("Medeni durum grafiği için veri bulunamadı.")
+    else:
+        st.info("MEDENI_DURUM kolonu bulunamadı.")
+
+with extra4:
+    st.markdown('<div class="panel-title">Gelir Seviyesi ile Sağlık Harcaması Arasındaki İlişki</div>', unsafe_allow_html=True)
+
+    if "LOG_GELIR_TOPLAM" in filtered_df.columns and "DEGER" in filtered_df.columns:
+        gelir_df = filtered_df[["LOG_GELIR_TOPLAM", "DEGER"]].dropna()
+
+        if not gelir_df.empty:
+            upper_x = gelir_df["LOG_GELIR_TOPLAM"].quantile(0.99)
+            upper_y = gelir_df["DEGER"].quantile(0.99)
+
+            gelir_df = gelir_df[
+                (gelir_df["LOG_GELIR_TOPLAM"] <= upper_x) &
+                (gelir_df["DEGER"] <= upper_y)
+            ]
+
+            sample_df = gelir_df.sample(min(len(gelir_df), 4000), random_state=42)
+
+            fig_income = px.scatter(
+                sample_df,
+                x="LOG_GELIR_TOPLAM",
+                y="DEGER",
+                opacity=0.32
+            )
+            fig_income = style_figure(
+                fig_income,
+                430,
+                x_title="Log Toplam Gelir",
+                y_title="Harcama"
+            )
+            fig_income.update_traces(
+                marker=dict(color=SOFT_CYAN, size=7, line=dict(width=0))
+            )
+            fig_income.update_xaxes(showgrid=False)
+            fig_income.update_yaxes(showgrid=False)
+            st.plotly_chart(fig_income, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("Gelir-harcama grafiği için veri bulunamadı.")
+    else:
+        st.info("GELIR_TOPLAM verisi bulunamadı.")
 
 # =========================================================
 # İÇGÖRÜ
 # =========================================================
-st.markdown('<div class="section-title">Öne Çıkan İçgörü</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Öne Çıkan Bulgular</div>', unsafe_allow_html=True)
 
-insight_text = "Yeterli veri bulunamadı."
+insight_text = "Bu filtre kombinasyonunda yorum üretmek için yeterli veri bulunamadı."
 
 if "DEGER" in filtered_df.columns and "HBS_KOD5" in filtered_df.columns and filtered_df["DEGER"].notna().any():
     temp_insight = filtered_df.copy()
@@ -635,9 +852,9 @@ if "DEGER" in filtered_df.columns and "HBS_KOD5" in filtered_df.columns and filt
         overall_mean = filtered_df["DEGER"].mean()
 
         insight_text = (
-            f"Filtrelenen veri setinde en yüksek toplam harcama <b>{top_name}</b> kaleminde görülmektedir. "
-            f"Bu kalemde toplam harcama <b>{top_value:,.2f}</b> düzeyindedir. "
-            f"Genel ortalama sağlık harcaması ise <b>{overall_mean:,.2f}</b> olarak hesaplanmıştır."
+            f"En yüksek toplam harcama, <b>{top_name}</b> kaleminde gözlemlendi.<br>"
+            f"Toplam harcama: <b>{fmt_number(top_value)}</b><br>"
+            f"Genel ortalama harcama: <b>{fmt_number(overall_mean)}</b>"
         )
 
 st.markdown(
@@ -652,8 +869,26 @@ st.markdown(
 # =========================================================
 # TABLO
 # =========================================================
-with st.expander("Filtrelenmiş veri önizlemesini göster"):
+with st.expander("Filtrelenmiş Veri Önizlemesi"):
     preview = filtered_df.copy()
+
+    rename_map = {
+        "BIRIMNO": "Birim No",
+        "ELDEEDIS_SEKIL": "Elde Ediliş Şekli",
+        "HBS_KOD5": "Harcama Kalemi",
+        "DEGER": "Tutar",
+        "FERTNO": "Fert No",
+        "CINSIYET": "Cinsiyet",
+        "YAS": "Yaş",
+        "YAKINLIK": "Yakınlık",
+        "SAGLIK_SIGORTA_1": "Sağlık Sigortası",
+        "SAKATLIK_GUNLUK": "Sakatlık Günlük",
+        "SAKATLIK_CALISMA": "Sakatlık Çalışma",
+        "OKUL_BITEN": "Eğitim",
+        "MEDENI_DURUM": "Medeni Durum",
+        "GELIR_TOPLAM": "Toplam Gelir",
+        "LOG_GELIR_TOPLAM": "Log Toplam Gelir"
+    }
 
     if "CINSIYET" in preview.columns:
         preview["CINSIYET"] = preview["CINSIYET"].apply(lambda x: map_label(x, CINSIYET_MAP))
@@ -663,5 +898,41 @@ with st.expander("Filtrelenmiş veri önizlemesini göster"):
         preview["SAGLIK_SIGORTA_1"] = preview["SAGLIK_SIGORTA_1"].apply(lambda x: map_label(x, SAGLIK_SIGORTA_MAP))
     if "HBS_KOD5" in preview.columns:
         preview["HBS_KOD5"] = preview["HBS_KOD5"].apply(lambda x: map_label(x, HBS_KOD5_MAP))
+    if "MEDENI_DURUM" in preview.columns:
+        preview["MEDENI_DURUM"] = preview["MEDENI_DURUM"].apply(lambda x: map_label(x, MEDENI_DURUM_MAP))
 
-    st.dataframe(preview.head(100), use_container_width=True)
+    if "DEGER" in preview.columns:
+        preview["DEGER"] = preview["DEGER"].round(2)
+    if "GELIR_TOPLAM" in preview.columns:
+        preview["GELIR_TOPLAM"] = preview["GELIR_TOPLAM"].round(2)
+    if "LOG_GELIR_TOPLAM" in preview.columns:
+        preview["LOG_GELIR_TOPLAM"] = preview["LOG_GELIR_TOPLAM"].round(2)
+
+    existing_rename_map = {k: v for k, v in rename_map.items() if k in preview.columns}
+    preview = preview.rename(columns=existing_rename_map)
+
+    preferred_cols = [
+        "Birim No",
+        "Harcama Kalemi",
+        "Tutar",
+        "Cinsiyet",
+        "Yaş",
+        "Yakınlık",
+        "Sağlık Sigortası",
+        "Eğitim",
+        "Medeni Durum",
+        "Toplam Gelir",
+        "Log Toplam Gelir"
+    ]
+
+    available_cols = [col for col in preferred_cols if col in preview.columns]
+    if available_cols:
+        preview = preview[available_cols]
+
+    st.data_editor(
+        preview.head(100),
+        use_container_width=True,
+        height=380,
+        disabled=True,
+        hide_index=True
+    )
