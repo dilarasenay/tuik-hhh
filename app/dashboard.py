@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import numpy as np
 import sys
 import os
 
@@ -70,163 +71,180 @@ st.markdown("""
 <style>
     .stApp {
         background:
-            radial-gradient(circle at top left, rgba(168, 85, 247, 0.16), transparent 22%),
-            radial-gradient(circle at top right, rgba(34, 211, 238, 0.14), transparent 24%),
-            radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.12), transparent 22%),
-            linear-gradient(135deg, #070b17 0%, #0b1224 45%, #081120 100%);
-        color: #f8fafc;
+            radial-gradient(circle at top left, rgba(57,255,20,0.10), transparent 22%),
+            radial-gradient(circle at top right, rgba(239,255,0,0.10), transparent 20%),
+            radial-gradient(circle at bottom right, rgba(0,255,156,0.08), transparent 24%),
+            linear-gradient(135deg, #030504 0%, #06100a 45%, #07110c 100%);
+        color: #f8fff4;
     }
 
     .block-container {
-        max-width: 1520px;
-        padding-top: 1.1rem;
+        max-width: 1500px;
+        padding-top: 1rem;
         padding-bottom: 2rem;
-        padding-left: 1.8rem;
-        padding-right: 1.8rem;
+        padding-left: 1.6rem;
+        padding-right: 1.6rem;
     }
 
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(10,16,32,0.94) 0%, rgba(11,18,36,0.96) 100%);
-        border-right: 1px solid rgba(255,255,255,0.06);
+        background: linear-gradient(180deg, rgba(4,8,6,0.98) 0%, rgba(7,14,10,0.98) 100%);
+        border-right: 1px solid rgba(124,255,0,0.10);
     }
 
     [data-testid="stSidebar"] * {
-        color: #f8fafc !important;
+        color: #f7ffe9 !important;
+    }
+
+    [data-testid="stSidebarNav"] {
+        background: transparent !important;
     }
 
     .hero-card {
         background:
-            linear-gradient(135deg, rgba(139, 92, 246, 0.90) 0%, rgba(236, 72, 153, 0.84) 50%, rgba(34, 211, 238, 0.78) 100%);
-        border: 1px solid rgba(255,255,255,0.12);
+            linear-gradient(135deg, rgba(8,18,12,0.96) 0%, rgba(24,50,20,0.92) 40%, rgba(82,255,0,0.24) 75%, rgba(239,255,0,0.18) 100%);
+        border: 1px solid rgba(124,255,0,0.16);
         border-radius: 28px;
-        padding: 32px 34px;
+        padding: 30px 32px;
         box-shadow:
-            0 0 0 1px rgba(255,255,255,0.04),
-            0 0 34px rgba(168, 85, 247, 0.25),
-            0 0 44px rgba(34, 211, 238, 0.10);
+            0 0 0 1px rgba(255,255,255,0.02),
+            0 0 24px rgba(57,255,20,0.12),
+            0 0 46px rgba(239,255,0,0.06);
         margin-bottom: 1rem;
     }
 
     .hero-title {
-        font-size: 2.25rem;
+        font-size: 2.15rem;
         font-weight: 900;
-        color: #ffffff;
+        color: #fafff2;
+        margin-bottom: 0.45rem;
         line-height: 1.08;
-        margin-bottom: 0.4rem;
-        text-shadow: 0 0 14px rgba(255,255,255,0.10);
+        text-shadow: 0 0 12px rgba(124,255,0,0.16);
     }
 
     .hero-subtitle {
         font-size: 1rem;
-        color: rgba(255,255,255,0.92);
-        max-width: 980px;
+        color: rgba(240,255,225,0.92);
         line-height: 1.6;
-    }
-
-    .mini-card {
-        background: linear-gradient(135deg, rgba(12, 26, 54, 0.80), rgba(16, 38, 74, 0.60));
-        border: 1px solid rgba(56, 189, 248, 0.18);
-        border-radius: 18px;
-        padding: 14px 16px;
-        box-shadow: 0 0 18px rgba(34, 211, 238, 0.08);
-        min-height: 82px;
-    }
-
-    .mini-label {
-        font-size: 0.88rem;
-        color: #cbd5e1;
-        margin-bottom: 0.35rem;
-    }
-
-    .mini-value {
-        font-size: 1.8rem;
-        font-weight: 900;
-        color: #ffffff;
+        max-width: 980px;
     }
 
     .section-title {
         font-size: 1.22rem;
         font-weight: 850;
-        color: #f8fafc;
-        margin-top: 0.1rem;
-        margin-bottom: 0.8rem;
-        text-shadow: 0 0 12px rgba(34,211,238,0.10);
+        color: #f7ffe9;
+        margin-top: 0.15rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .mini-card {
+        background: linear-gradient(135deg, rgba(5,13,8,0.96), rgba(9,20,12,0.92));
+        border: 1px solid rgba(124,255,0,0.12);
+        border-radius: 20px;
+        padding: 14px 16px;
+        box-shadow: 0 0 14px rgba(57,255,20,0.05);
+    }
+
+    .mini-label {
+        font-size: 0.88rem;
+        color: #d8f7c5;
+        margin-bottom: 0.4rem;
+    }
+
+    .mini-value {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #fafff2;
+        text-shadow: 0 0 8px rgba(124,255,0,0.10);
     }
 
     .kpi-card {
-        background: linear-gradient(135deg, rgba(13, 20, 38, 0.92), rgba(17, 26, 48, 0.78));
-        border: 1px solid rgba(255,255,255,0.08);
+        background: linear-gradient(135deg, rgba(5,10,7,0.98), rgba(9,16,10,0.94));
+        border: 1px solid rgba(124,255,0,0.10);
         border-radius: 22px;
         padding: 18px 20px;
         box-shadow:
-            0 0 0 1px rgba(255,255,255,0.03),
-            0 0 20px rgba(139, 92, 246, 0.10);
-        min-height: 110px;
+            0 0 0 1px rgba(255,255,255,0.01),
+            0 0 18px rgba(57,255,20,0.05);
+        min-height: 108px;
     }
 
     .kpi-label {
         font-size: 0.92rem;
-        color: #cbd5e1;
+        color: #d3f9be;
         margin-bottom: 0.45rem;
     }
 
     .kpi-value {
-        font-size: 1.95rem;
+        font-size: 1.9rem;
         font-weight: 900;
-        color: #ffffff;
+        color: #fbfff3;
         line-height: 1.05;
-        text-shadow: 0 0 8px rgba(236,72,153,0.08);
     }
 
     .panel-card {
-        background: linear-gradient(135deg, rgba(8, 14, 29, 0.94), rgba(12, 20, 38, 0.84));
-        border: 1px solid rgba(255,255,255,0.07);
+        background: linear-gradient(135deg, rgba(3,8,5,0.98), rgba(7,13,8,0.95));
+        border: 1px solid rgba(124,255,0,0.08);
         border-radius: 24px;
         padding: 16px 16px 8px 16px;
         box-shadow:
-            0 0 0 1px rgba(255,255,255,0.03),
-            0 0 24px rgba(34, 211, 238, 0.06);
+            0 0 0 1px rgba(255,255,255,0.01),
+            0 0 18px rgba(57,255,20,0.04);
         margin-bottom: 1rem;
+    }
+
+    .panel-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #f7ffe9;
+        margin-bottom: 0.6rem;
     }
 
     .insight-card {
-        background: linear-gradient(135deg, rgba(236,72,153,0.12), rgba(139,92,246,0.10), rgba(34,211,238,0.08));
-        border: 1px solid rgba(255,255,255,0.08);
-        border-left: 5px solid #22d3ee;
+        background: linear-gradient(135deg, rgba(12,22,8,0.92), rgba(30,48,10,0.70));
+        border: 1px solid rgba(239,255,0,0.10);
+        border-left: 5px solid #39FF14;
         border-radius: 20px;
         padding: 16px 18px;
-        color: #f8fafc;
-        line-height: 1.65;
-        box-shadow: 0 0 22px rgba(236,72,153,0.08);
+        color: #f8fff2;
+        line-height: 1.7;
+        box-shadow: 0 0 20px rgba(239,255,0,0.04);
     }
 
     .sidebar-title {
-        font-size: 1.5rem;
+        font-size: 1.45rem;
         font-weight: 900;
-        color: #ffffff;
-        margin-bottom: 1rem;
-    }
-
-    .sidebar-note {
-        font-size: 0.9rem;
-        color: #cbd5e1;
-        margin-top: -0.2rem;
+        color: #fbfff2;
         margin-bottom: 1rem;
     }
 
     div[data-baseweb="select"] > div {
-        background: rgba(11, 18, 36, 0.88) !important;
-        border: 1px solid rgba(255,255,255,0.08) !important;
+        background: rgba(6,12,8,0.96) !important;
+        border: 1px solid rgba(124,255,0,0.10) !important;
         border-radius: 14px !important;
-        color: white !important;
+        color: #fbfff2 !important;
     }
 
     .stSlider [data-baseweb="slider"] {
-        padding-top: 0.35rem;
+        padding-top: 0.25rem;
     }
 
     .stCheckbox label, .stRadio label {
-        color: #f8fafc !important;
+        color: #f7ffe9 !important;
+    }
+
+    .stRadio > div {
+        gap: 1rem;
+    }
+
+    [data-testid="stDataFrame"] {
+        background: rgba(6,12,8,0.98) !important;
+        border: 1px solid rgba(124,255,0,0.08) !important;
+        border-radius: 18px !important;
+        overflow: hidden !important;
+    }
+
+    [data-testid="stDataFrame"] * {
+        color: #e9ffe0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -269,6 +287,23 @@ def safe_mean(df, group_col, value_col):
         .sort_values(value_col, ascending=False)
     )
 
+def style_figure(fig, height, title=None, x_title="", y_title=""):
+    fig.update_layout(
+        height=height,
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=10, r=10, t=50, b=10),
+        title=title,
+        title_font_size=18,
+        title_font_color="#f7ffe9",
+        font=dict(color="#dff7cf"),
+        xaxis_title=x_title,
+        yaxis_title=y_title
+    )
+    fig.update_xaxes(gridcolor="rgba(124,255,0,0.10)", zeroline=False)
+    fig.update_yaxes(gridcolor="rgba(124,255,0,0.10)", zeroline=False)
+    return fig
+
 # =========================================================
 # VERİ
 # =========================================================
@@ -279,10 +314,6 @@ filtered_df = df.copy()
 # SIDEBAR
 # =========================================================
 st.sidebar.markdown('<div class="sidebar-title">Filtreler</div>', unsafe_allow_html=True)
-st.sidebar.markdown(
-    '<div class="sidebar-note">Kategori seçimlerini sade tuttum; böylece görünüm daha temiz ve premium kalıyor.</div>',
-    unsafe_allow_html=True
-)
 
 active_filters = 0
 
@@ -326,7 +357,7 @@ st.markdown("""
     <div class="hero-title">TÜİK Sağlık Harcaması Dashboard</div>
     <div class="hero-subtitle">
         Sağlık harcama kalemleri ile demografik değişkenler arasındaki ilişkiyi etkileşimli filtreler,
-        istatistiki özetler ve karşılaştırmalı görselleştirmeler üzerinden inceleyen neon temalı analitik panel.
+        istatistiki özetler ve karşılaştırmalı görselleştirmelerle inceleyen neon lime temalı analitik panel.
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -388,7 +419,7 @@ if "DEGER" in filtered_df.columns and filtered_df["DEGER"].notna().any():
 st.markdown("<br>", unsafe_allow_html=True)
 
 # =========================================================
-# ANA PANEL
+# ANA ANALİZ
 # =========================================================
 main_left, main_right = st.columns([1.7, 1])
 
@@ -397,12 +428,14 @@ with main_left:
     st.markdown('<div class="panel-card">', unsafe_allow_html=True)
 
     ctrl1, ctrl2 = st.columns([2, 1])
+
     with ctrl1:
         metric_type = st.radio(
             "Gösterim Türü",
             ["Toplam Harcama", "Ortalama Harcama", "Frekans"],
             horizontal=True
         )
+
     with ctrl2:
         top_n = st.slider("Top N", 5, 12, 8)
 
@@ -420,7 +453,7 @@ with main_left:
             )
             value_col = "DEGER"
             title = "Sağlık Harcama Kalemlerine Göre Toplam Harcama"
-            color = "#22d3ee"
+            color = "#39FF14"
 
         elif metric_type == "Ortalama Harcama":
             grouped = (
@@ -432,7 +465,7 @@ with main_left:
             )
             value_col = "DEGER"
             title = "Sağlık Harcama Kalemlerine Göre Ortalama Harcama"
-            color = "#a855f7"
+            color = "#EFFF00"
 
         else:
             grouped = (
@@ -444,7 +477,7 @@ with main_left:
             )
             value_col = "FREKANS"
             title = "Sağlık Harcama Kalemlerine Göre Frekans"
-            color = "#fb7185"
+            color = "#7CFF00"
 
         grouped["KISA"] = grouped["HARCAMA_KALEMI"].apply(shorten_text)
 
@@ -455,21 +488,10 @@ with main_left:
             orientation="h",
             title=title
         )
-        fig_main.update_layout(
-            height=470,
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(l=10, r=10, t=60, b=10),
-            title_font_size=18,
-            title_font_color="#f8fafc",
-            font=dict(color="#e2e8f0"),
-            xaxis_title="",
-            yaxis_title=""
-        )
+        fig_main = style_figure(fig_main, 470, title=title)
         fig_main.update_traces(marker_color=color)
-        fig_main.update_xaxes(gridcolor="rgba(255,255,255,0.10)")
         fig_main.update_yaxes(showgrid=False)
-        st.plotly_chart(fig_main, use_container_width=True)
+        st.plotly_chart(fig_main, use_container_width=True, config={"displayModeBar": False})
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -478,38 +500,32 @@ with main_right:
     st.markdown('<div class="panel-card">', unsafe_allow_html=True)
 
     if "DEGER" in filtered_df.columns and filtered_df["DEGER"].notna().any():
+        log_df = filtered_df[filtered_df["DEGER"] > 0].copy()
+        log_df["LOG_DEGER"] = log_df["DEGER"].apply(lambda x: np.log10(x) if x > 0 else None)
+
         fig_hist = px.histogram(
-            filtered_df,
-            x="DEGER",
+            log_df,
+            x="LOG_DEGER",
             nbins=35,
-            title="Sağlık Harcaması Dağılımı"
+            title="Log Ölçekte Harcama Dağılımı"
         )
-        fig_hist.update_layout(
-            height=470,
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(l=10, r=10, t=60, b=10),
-            title_font_size=18,
-            title_font_color="#f8fafc",
-            font=dict(color="#e2e8f0"),
-            xaxis_title="Harcama Değeri",
-            yaxis_title=""
-        )
-        fig_hist.update_traces(marker_color="#f472b6")
+        fig_hist = style_figure(fig_hist, 470, title="Log Ölçekte Harcama Dağılımı", x_title="log10(Harcama)")
+        fig_hist.update_traces(marker_color="#FFD400")
         fig_hist.update_xaxes(showgrid=False)
-        fig_hist.update_yaxes(gridcolor="rgba(255,255,255,0.10)")
-        st.plotly_chart(fig_hist, use_container_width=True)
+        st.plotly_chart(fig_hist, use_container_width=True, config={"displayModeBar": False})
 
     st.markdown('</div>', unsafe_allow_html=True)
 
 # =========================================================
-# ALT GRAFİKLER
+# DEMOGRAFİK ANALİZ
 # =========================================================
-bottom1, bottom2 = st.columns(2)
+st.markdown('<div class="section-title">Demografik Analiz</div>', unsafe_allow_html=True)
 
-with bottom1:
-    st.markdown('<div class="section-title">Yaşa Göre Ortalama Harcama</div>', unsafe_allow_html=True)
+demo1, demo2 = st.columns(2)
+
+with demo1:
     st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">Yaş Eğilimi</div>', unsafe_allow_html=True)
 
     if "YAS" in filtered_df.columns and "DEGER" in filtered_df.columns:
         age_df = (
@@ -518,28 +534,17 @@ with bottom1:
             .reset_index()
             .sort_values("YAS")
         )
-        fig_age = px.line(age_df, x="YAS", y="DEGER", title="Yaş Eğilimi")
-        fig_age.update_layout(
-            height=390,
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(l=10, r=10, t=60, b=10),
-            title_font_size=18,
-            title_font_color="#f8fafc",
-            font=dict(color="#e2e8f0"),
-            xaxis_title="Yaş",
-            yaxis_title=""
-        )
-        fig_age.update_traces(line=dict(color="#a855f7", width=3))
+        fig_age = px.line(age_df, x="YAS", y="DEGER")
+        fig_age = style_figure(fig_age, 390, x_title="Yaş")
+        fig_age.update_traces(line=dict(color="#00FF9C", width=3))
         fig_age.update_xaxes(showgrid=False)
-        fig_age.update_yaxes(gridcolor="rgba(255,255,255,0.10)")
-        st.plotly_chart(fig_age, use_container_width=True)
+        st.plotly_chart(fig_age, use_container_width=True, config={"displayModeBar": False})
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-with bottom2:
-    st.markdown('<div class="section-title">Cinsiyete Göre Ortalama Harcama</div>', unsafe_allow_html=True)
+with demo2:
     st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">Cinsiyet Karşılaştırması</div>', unsafe_allow_html=True)
 
     if "CINSIYET" in filtered_df.columns and "DEGER" in filtered_df.columns:
         gender_df = safe_mean(filtered_df, "CINSIYET", "DEGER")
@@ -548,24 +553,12 @@ with bottom2:
         fig_gender = px.bar(
             gender_df,
             x="CINSIYET_ETIKET",
-            y="DEGER",
-            title="Cinsiyet Karşılaştırması"
+            y="DEGER"
         )
-        fig_gender.update_layout(
-            height=390,
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(l=10, r=10, t=60, b=10),
-            title_font_size=18,
-            title_font_color="#f8fafc",
-            font=dict(color="#e2e8f0"),
-            xaxis_title="",
-            yaxis_title=""
-        )
-        fig_gender.update_traces(marker_color="#8b5cf6")
+        fig_gender = style_figure(fig_gender, 390)
+        fig_gender.update_traces(marker_color="#EFFF00")
         fig_gender.update_xaxes(showgrid=False)
-        fig_gender.update_yaxes(gridcolor="rgba(255,255,255,0.10)")
-        st.plotly_chart(fig_gender, use_container_width=True)
+        st.plotly_chart(fig_gender, use_container_width=True, config={"displayModeBar": False})
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -575,70 +568,48 @@ with bottom2:
 extra1, extra2 = st.columns(2)
 
 with extra1:
-    st.markdown('<div class="section-title">Eğitim Durumuna Göre Ortalama Harcama</div>', unsafe_allow_html=True)
     st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">Eğitim Kırılımı</div>', unsafe_allow_html=True)
 
     if "OKUL_BITEN" in filtered_df.columns and "DEGER" in filtered_df.columns:
         edu_df = safe_mean(filtered_df, "OKUL_BITEN", "DEGER")
         edu_df["EGITIM_ETIKET"] = edu_df["OKUL_BITEN"].apply(lambda x: map_label(x, OKUL_BITEN_MAP))
+        edu_df = edu_df[edu_df["EGITIM_ETIKET"] != "Bilinmiyor"]
         edu_df["EGITIM_KISA"] = edu_df["EGITIM_ETIKET"].apply(lambda x: shorten_text(x, 32))
 
         fig_edu = px.bar(
             edu_df.sort_values("DEGER", ascending=True),
             x="DEGER",
             y="EGITIM_KISA",
-            orientation="h",
-            title="Eğitim Kırılımı"
+            orientation="h"
         )
-        fig_edu.update_layout(
-            height=430,
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(l=10, r=10, t=60, b=10),
-            title_font_size=18,
-            title_font_color="#f8fafc",
-            font=dict(color="#e2e8f0"),
-            xaxis_title="",
-            yaxis_title=""
-        )
-        fig_edu.update_traces(marker_color="#fb7185")
-        fig_edu.update_xaxes(gridcolor="rgba(255,255,255,0.10)")
+        fig_edu = style_figure(fig_edu, 430)
+        fig_edu.update_traces(marker_color="#7CFF00")
         fig_edu.update_yaxes(showgrid=False)
-        st.plotly_chart(fig_edu, use_container_width=True)
+        st.plotly_chart(fig_edu, use_container_width=True, config={"displayModeBar": False})
 
     st.markdown('</div>', unsafe_allow_html=True)
 
 with extra2:
-    st.markdown('<div class="section-title">Sigorta Türüne Göre Ortalama Harcama</div>', unsafe_allow_html=True)
     st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">Sigorta Kırılımı</div>', unsafe_allow_html=True)
 
     if "SAGLIK_SIGORTA_1" in filtered_df.columns and "DEGER" in filtered_df.columns:
         ins_df = safe_mean(filtered_df, "SAGLIK_SIGORTA_1", "DEGER")
         ins_df["SIGORTA_ETIKET"] = ins_df["SAGLIK_SIGORTA_1"].apply(lambda x: map_label(x, SAGLIK_SIGORTA_MAP))
+        ins_df = ins_df[ins_df["SIGORTA_ETIKET"] != "Bilinmiyor"]
         ins_df["SIGORTA_KISA"] = ins_df["SIGORTA_ETIKET"].apply(lambda x: shorten_text(x, 32))
 
         fig_ins = px.bar(
             ins_df.sort_values("DEGER", ascending=True),
             x="DEGER",
             y="SIGORTA_KISA",
-            orientation="h",
-            title="Sigorta Kırılımı"
+            orientation="h"
         )
-        fig_ins.update_layout(
-            height=430,
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(l=10, r=10, t=60, b=10),
-            title_font_size=18,
-            title_font_color="#f8fafc",
-            font=dict(color="#e2e8f0"),
-            xaxis_title="",
-            yaxis_title=""
-        )
-        fig_ins.update_traces(marker_color="#38bdf8")
-        fig_ins.update_xaxes(gridcolor="rgba(255,255,255,0.10)")
+        fig_ins = style_figure(fig_ins, 430)
+        fig_ins.update_traces(marker_color="#F5FF57")
         fig_ins.update_yaxes(showgrid=False)
-        st.plotly_chart(fig_ins, use_container_width=True)
+        st.plotly_chart(fig_ins, use_container_width=True, config={"displayModeBar": False})
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -652,7 +623,6 @@ insight_text = "Yeterli veri bulunamadı."
 if "DEGER" in filtered_df.columns and "HBS_KOD5" in filtered_df.columns and filtered_df["DEGER"].notna().any():
     temp_insight = filtered_df.copy()
     temp_insight["HARCAMA_KALEMI"] = temp_insight["HBS_KOD5"].apply(lambda x: map_label(x, HBS_KOD5_MAP))
-
     top_category = (
         temp_insight.groupby("HARCAMA_KALEMI")["DEGER"]
         .sum()
@@ -682,9 +652,7 @@ st.markdown(
 # =========================================================
 # TABLO
 # =========================================================
-show_table = st.checkbox("Filtrelenmiş veri önizlemesini göster")
-
-if show_table:
+with st.expander("Filtrelenmiş veri önizlemesini göster"):
     preview = filtered_df.copy()
 
     if "CINSIYET" in preview.columns:
@@ -696,5 +664,4 @@ if show_table:
     if "HBS_KOD5" in preview.columns:
         preview["HBS_KOD5"] = preview["HBS_KOD5"].apply(lambda x: map_label(x, HBS_KOD5_MAP))
 
-    st.markdown('<div class="section-title">Filtrelenmiş Veri Önizleme</div>', unsafe_allow_html=True)
     st.dataframe(preview.head(100), use_container_width=True)
