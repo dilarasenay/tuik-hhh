@@ -4,6 +4,7 @@ import plotly.express as px
 import numpy as np
 import sys
 import os
+import html
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from db.db import load_data
@@ -27,7 +28,10 @@ if "alert_data" not in st.session_state:
     st.session_state.alert_data = {
         "title": "",
         "subtitle": "",
-        "detail": ""
+        "detail": "",
+        "risk": "Yüksek Risk",
+        "tag2": "Dar Örneklem",
+        "tag3": "Filtre Kaynaklı İçgörü"
     }
 
 # =========================================================
@@ -152,18 +156,9 @@ st.markdown("""
         padding-top: 0.8rem !important;
     }
 
-    [data-testid="collapsedControl"] {
-        display: none !important;
-    }
-
-    button[kind="header"] {
-        display: none !important;
-    }
-
-    [data-testid="stSidebarCollapseButton"] {
-        display: none !important;
-    }
-
+    [data-testid="collapsedControl"],
+    button[kind="header"],
+    [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarNavCollapseButton"] {
         display: none !important;
     }
@@ -333,95 +328,118 @@ st.markdown("""
         padding-top: 0.3rem !important;
     }
 
-    .critical-overlay {
+    .popup-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.42);
-        backdrop-filter: blur(4px);
-        z-index: 999990;
+        background: rgba(15,23,42,.28);
+        backdrop-filter: blur(6px);
+        z-index: 99990;
         pointer-events: none;
     }
 
-    .critical-alert-modal {
+    .popup-wrap {
         position: fixed;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -54%);
-        width: min(92vw, 560px);
-        z-index: 999991;
-        border-radius: 26px;
-        padding: 26px 24px 18px 24px;
-        background:
-            radial-gradient(circle at 50% 0%, rgba(239,68,68,0.28), transparent 35%),
-            linear-gradient(180deg, rgba(24,24,37,0.97) 0%, rgba(17,24,39,0.98) 100%);
-        border: 1px solid rgba(248,113,113,0.45);
-        box-shadow:
-            0 0 0 1px rgba(248,113,113,0.18),
-            0 0 28px rgba(239,68,68,0.35),
-            0 0 70px rgba(239,68,68,0.22),
-            0 24px 80px rgba(0,0,0,0.40);
-        text-align: center;
+        transform: translate(-50%, -50%);
+        z-index: 99991;
+        width: min(520px, 86vw);
         pointer-events: none;
     }
 
-    .critical-alert-icon {
-        font-size: 4rem;
-        line-height: 1;
-        margin-bottom: 0.55rem;
-        filter: drop-shadow(0 0 12px rgba(248,113,113,0.45));
+    .popup-card {
+        background: rgba(255,248,248,.97);
+        border: 1px solid rgba(239,68,68,.14);
+        border-radius: 20px;
+        box-shadow: 0 18px 55px rgba(15,23,42,.18);
+        padding: 22px 22px 18px 22px;
+        font-family: "Segoe UI", sans-serif;
     }
 
-    .critical-alert-title {
-        color: #fca5a5 !important;
-        font-size: 1.42rem;
+    .popup-title {
+        color: #991b1b;
+        font-size: 1.85rem;
         font-weight: 900;
-        letter-spacing: 0.4px;
-        margin-bottom: 0.18rem;
+        line-height: 1.08;
+        margin: 0 38px 10px 0;
         text-transform: uppercase;
     }
 
-    .critical-alert-subtitle {
-        color: #ffffff !important;
-        font-size: 1.02rem;
+    .popup-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+    }
+
+    .popup-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: .74rem;
         font-weight: 800;
-        margin-bottom: 0.55rem;
-        letter-spacing: 0.12px;
+        line-height: 1;
+        border: 1px solid transparent;
     }
 
-    .critical-alert-detail {
-        color: #e5e7eb !important;
-        font-size: 0.95rem;
-        line-height: 1.65;
-        margin: 0 auto 0.15rem auto;
-        max-width: 470px;
+    .popup-badge.red {
+        background: #fee2e2;
+        color: #b91c1c;
+        border-color: #fecaca;
     }
 
-    .critical-alert-close-note {
-        color: #fca5a5 !important;
-        font-size: 0.8rem;
-        margin-top: 0.8rem;
-        opacity: 0.95;
+    .popup-badge.yellow {
+        background: #fef3c7;
+        color: #a16207;
+        border-color: #fde68a;
     }
 
-    .critical-button-wrap {
-        position: fixed;
-        top: calc(50% + 155px);
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(92vw, 220px);
-        z-index: 999992;
+    .popup-detail {
+        color: #3f3f46;
+        font-size: 1rem;
+        line-height: 1.7;
+        margin-bottom: 14px;
     }
 
-    .critical-button-wrap .stButton > button {
-        width: 100% !important;
-        height: 48px !important;
-        border-radius: 14px !important;
-        font-weight: 800 !important;
-        font-size: 0.95rem !important;
-        background: linear-gradient(135deg, #374151, #1f2937) !important;
-        color: #f9fafb !important;
-        border: 1px solid rgba(255,255,255,0.10) !important;
-        box-shadow: 0 10px 24px rgba(0,0,0,0.22) !important;
+    .popup-note {
+        color: #2563eb;
+        font-size: .78rem;
+        font-weight: 700;
+        background: #eff6ff;
+        display: inline-block;
+        padding: 7px 10px;
+        border-radius: 999px;
+    }
+
+    /* Gerçek çalışan X butonu */
+    div[data-testid="stButton"]:has(> button[kind="secondary"]) {
+        position: fixed !important;
+        top: calc(50% - 132px) !important;
+        left: calc(50% + 210px) !important;
+        z-index: 100001 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    div[data-testid="stButton"]:has(> button[kind="secondary"]) button {
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        border-radius: 50% !important;
+        border: none !important;
+        background: #ef4444 !important;
+        color: white !important;
+        font-size: 1rem !important;
+        font-weight: 900 !important;
+        box-shadow: 0 10px 22px rgba(239,68,68,.30) !important;
+        padding: 0 !important;
+        cursor: pointer !important;
+    }
+
+    div[data-testid="stButton"]:has(> button[kind="secondary"]) button:hover {
+        background: #dc2626 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -565,11 +583,14 @@ def get_filter_context_text(selected_gender, selected_age, selected_edu, selecte
 
     return ", ".join(parts) + " seçimine göre"
 
-def open_data_alert(title, subtitle, detail):
+def open_data_alert(title, subtitle, detail, risk="Yüksek Risk", tag2="Dar Örneklem", tag3="Filtre Kaynaklı İçgörü"):
     st.session_state.alert_data = {
-        "title": title,
-        "subtitle": subtitle,
-        "detail": detail
+        "title": str(title),
+        "subtitle": str(subtitle),
+        "detail": str(detail),
+        "risk": str(risk),
+        "tag2": str(tag2),
+        "tag3": str(tag3)
     }
     st.session_state.alert_open = True
 
@@ -579,27 +600,33 @@ def render_alert():
 
     data = st.session_state.alert_data
 
-    st.markdown(
-        f"""
-        <div class="critical-overlay"></div>
-        <div class="critical-alert-modal">
-            <div class="critical-alert-icon">⚠️</div>
-            <div class="critical-alert-title">{data['title']}</div>
-            <div class="critical-alert-subtitle">{data['subtitle']}</div>
-            <div class="critical-alert-detail">{data['detail']}</div>
-            <div class="critical-alert-close-note">
-                Bu uyarı filtre değişikliği sonrası otomatik üretildi.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    safe_title = html.escape(str(data.get("title", "")))
+    safe_subtitle = html.escape(str(data.get("subtitle", "")))
+    safe_detail = html.escape(str(data.get("detail", ""))).replace("\n", "<br>")
+    safe_risk = html.escape(str(data.get("risk", "Yüksek Risk")))
+    safe_tag2 = html.escape(str(data.get("tag2", "Dar Örneklem")))
+    safe_tag3 = html.escape(str(data.get("tag3", "Filtre Kaynaklı İçgörü")))
 
-    st.markdown('<div class="critical-button-wrap">', unsafe_allow_html=True)
-    if st.button("KAPAT", key="alert_close_btn", use_container_width=True):
+    popup_html = (
+        '<div class="popup-overlay"></div>'
+        '<div class="popup-wrap">'
+            '<div class="popup-card">'
+                f'<div class="popup-title">{safe_title}: {safe_subtitle}</div>'
+                '<div class="popup-badges">'
+                    f'<div class="popup-badge red">▲ {safe_risk}</div>'
+                    f'<div class="popup-badge yellow">⚠ {safe_tag2}</div>'
+                '</div>'
+                f'<div class="popup-detail">{safe_detail}</div>'
+                f'<div class="popup-note">{safe_tag3}</div>'
+            '</div>'
+        '</div>'
+    )
+    st.markdown(popup_html, unsafe_allow_html=True)
+
+    close_clicked = st.button("✕", key="alert_close_btn", type="secondary")
+    if close_clicked:
         st.session_state.alert_open = False
         st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
 
 def generate_filter_change_alert(filtered_df, filter_context):
     if len(filtered_df) < 500:
@@ -607,9 +634,14 @@ def generate_filter_change_alert(filtered_df, filter_context):
             "title": "DİKKAT",
             "subtitle": "FİLTRELENEN VERİ DARALDI",
             "detail": (
-                f"{filter_context} analiz edilen kayıt sayısı {fmt_int(len(filtered_df))} seviyesine düştü. "
-                f"Grafikler daha dar bir grubu temsil ediyor olabilir."
-            )
+                f"Filtreleme seçenekleriniz sonucunda analiz edilen kayıt sayısı "
+                f"{fmt_int(len(filtered_df))}'in altına düştü. "
+                f"Gösterilen grafikler daha dar bir grubu temsil etmektedir. "
+                f"Genelleme yaparken dikkatli olunuz."
+            ),
+            "risk": "Yüksek Risk",
+            "tag2": "Dar Örneklem",
+            "tag3": "Filtre Kaynaklı İçgörü"
         }
 
     if "DEGER" not in filtered_df.columns or not filtered_df["DEGER"].notna().any():
@@ -632,10 +664,13 @@ def generate_filter_change_alert(filtered_df, filter_context):
                 "title": "DİKKAT",
                 "subtitle": "UÇ HARCAMA DEĞERLERİ ARTTI",
                 "detail": (
-                    f"{filter_context} olağan dışı yüksek sağlık harcaması oranı "
+                    f"{filter_context} göre olağan dışı yüksek sağlık harcaması oranı "
                     f"%{outlier_ratio * 100:.1f} seviyesine çıktı. "
                     f"Bu seçili grupta maliyet yoğunluğu artmış görünüyor."
-                )
+                ),
+                "risk": "Yüksek Risk",
+                "tag2": "Uç Değer Artışı",
+                "tag3": "Maliyet Yoğunluğu"
             }
 
     avg_val = deger.mean()
@@ -649,7 +684,10 @@ def generate_filter_change_alert(filtered_df, filter_context):
             "detail": (
                 f"{filter_context} ortalama sağlık harcaması {fmt_number(avg_val)} seviyesine çıktı. "
                 f"Seçili grubun harcama yükü genel yapıya göre daha yüksek görünüyor."
-            )
+            ),
+            "risk": "Yüksek Risk",
+            "tag2": "Ortalama Artışı",
+            "tag3": "Maliyet Yoğunluğu"
         }
 
     if med_val < 10 and avg_val > 100:
@@ -659,7 +697,10 @@ def generate_filter_change_alert(filtered_df, filter_context):
             "detail": (
                 f"{filter_context} medyan harcama {fmt_number(med_val)}, ortalama ise {fmt_number(avg_val)} oldu. "
                 f"Az sayıdaki yüksek harcama genel dağılımı yukarı çekiyor olabilir."
-            )
+            ),
+            "risk": "Yüksek Risk",
+            "tag2": "Dengesiz Dağılım",
+            "tag3": "Aykırı Etki"
         }
 
     if std_val > 800:
@@ -669,7 +710,10 @@ def generate_filter_change_alert(filtered_df, filter_context):
             "detail": (
                 f"{filter_context} harcama değerlerinin standart sapması {fmt_number(std_val)} seviyesine yükseldi. "
                 f"Maliyet yapısı homojen görünmüyor."
-            )
+            ),
+            "risk": "Orta Risk",
+            "tag2": "Yüksek Oynaklık",
+            "tag3": "Dağılım Riski"
         }
 
     if "HBS_KOD5" in filtered_df.columns:
@@ -686,7 +730,10 @@ def generate_filter_change_alert(filtered_df, filter_context):
                         "subtitle": "TEK HARCAMA KALEMİNDE YOĞUNLAŞMA VAR",
                         "detail": (
                             f"{filter_context} toplam sağlık harcamasının %{share:.1f}'i '{top_label}' kaleminde toplandı."
-                        )
+                        ),
+                        "risk": "Orta Risk",
+                        "tag2": "Yoğunlaşma",
+                        "tag3": "Kalem Baskısı"
                     }
 
     if "OKUL_BITEN" in filtered_df.columns:
@@ -702,7 +749,10 @@ def generate_filter_change_alert(filtered_df, filter_context):
                     "detail": (
                         f"{filter_context} eğitim grupları arasında ortalama sağlık harcaması farkı yükseldi. "
                         f"En yüksek grup: '{edu_top}'."
-                    )
+                    ),
+                    "risk": "Orta Risk",
+                    "tag2": "Eğitim Farkı",
+                    "tag3": "Segment Ayrışması"
                 }
 
     if "SAGLIK_SIGORTA_1" in filtered_df.columns:
@@ -718,7 +768,10 @@ def generate_filter_change_alert(filtered_df, filter_context):
                     "detail": (
                         f"{filter_context} sigorta türleri arasında belirgin sağlık harcaması farkı oluştu. "
                         f"En yüksek grup: '{ins_top}'."
-                    )
+                    ),
+                    "risk": "Orta Risk",
+                    "tag2": "Sigorta Farkı",
+                    "tag3": "Kırılım Etkisi"
                 }
 
     if "LOG_GELIR_TOPLAM" in filtered_df.columns:
@@ -733,7 +786,10 @@ def generate_filter_change_alert(filtered_df, filter_context):
                         "detail": (
                             f"{filter_context} gelir ile sağlık harcaması arasında güçlü pozitif ilişki tespit edildi "
                             f"(korelasyon: {corr_val:.2f})."
-                        )
+                        ),
+                        "risk": "Orta Risk",
+                        "tag2": "Güçlü Korelasyon",
+                        "tag3": "Gelir Etkisi"
                     }
                 if corr_val <= -0.35:
                     return {
@@ -742,7 +798,10 @@ def generate_filter_change_alert(filtered_df, filter_context):
                         "detail": (
                             f"{filter_context} gelir ile sağlık harcaması arasında negatif yönlü güçlü ilişki tespit edildi "
                             f"(korelasyon: {corr_val:.2f})."
-                        )
+                        ),
+                        "risk": "Orta Risk",
+                        "tag2": "Negatif İlişki",
+                        "tag3": "Gelir Davranışı"
                     }
 
     return None
@@ -865,7 +924,14 @@ filter_context = get_filter_context_text(
 if filter_changed and not first_load:
     alert = generate_filter_change_alert(filtered_df, filter_context)
     if alert:
-        open_data_alert(alert["title"], alert["subtitle"], alert["detail"])
+        open_data_alert(
+            alert["title"],
+            alert["subtitle"],
+            alert["detail"],
+            alert.get("risk", "Yüksek Risk"),
+            alert.get("tag2", "Dar Örneklem"),
+            alert.get("tag3", "Filtre Kaynaklı İçgörü")
+        )
 
 # =========================================================
 # HERO
