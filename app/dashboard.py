@@ -15,6 +15,22 @@ st.set_page_config(
 )
 
 # =========================================================
+# SESSION STATE
+# =========================================================
+if "last_filter_signature" not in st.session_state:
+    st.session_state.last_filter_signature = None
+
+if "alert_open" not in st.session_state:
+    st.session_state.alert_open = False
+
+if "alert_data" not in st.session_state:
+    st.session_state.alert_data = {
+        "title": "",
+        "subtitle": "",
+        "detail": ""
+    }
+
+# =========================================================
 # RENKLER
 # =========================================================
 PRIMARY_GREEN = "#22c55e"
@@ -23,7 +39,6 @@ SOFT_BLUE = "#38bdf8"
 SOFT_ORANGE = "#f59e0b"
 SOFT_CYAN = "#06b6d4"
 SOFT_INDIGO = "#6366f1"
-SOFT_PINK = "#f472b6"
 SOFT_EMERALD = "#10b981"
 TEXT_DARK = "#0f172a"
 TEXT_MID = "#334155"
@@ -151,29 +166,6 @@ st.markdown("""
 
     [data-testid="stSidebarNavCollapseButton"] {
         display: none !important;
-    }
-
-    [data-testid="stSidebarNav"] {
-        padding-top: 0.2rem !important;
-    }
-
-    [data-testid="stSidebarNav"] a {
-        border-radius: 14px !important;
-        margin-bottom: 0.45rem !important;
-        padding: 0.62rem 0.85rem !important;
-        color: #0f172a !important;
-        transition: all 0.2s ease;
-    }
-
-    [data-testid="stSidebarNav"] a:hover {
-        background: rgba(219, 234, 254, 0.60) !important;
-    }
-
-    [data-testid="stSidebarNav"] a[aria-current="page"] {
-        background: linear-gradient(135deg, rgba(219,234,254,0.95), rgba(224,231,255,0.88)) !important;
-        font-weight: 800 !important;
-        color: #0f172a !important;
-        box-shadow: 0 8px 18px rgba(99,102,241,0.10);
     }
 
     .hero-card {
@@ -340,6 +332,97 @@ st.markdown("""
     .stSlider [data-baseweb="slider"] {
         padding-top: 0.3rem !important;
     }
+
+    .critical-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.42);
+        backdrop-filter: blur(4px);
+        z-index: 999990;
+        pointer-events: none;
+    }
+
+    .critical-alert-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -54%);
+        width: min(92vw, 560px);
+        z-index: 999991;
+        border-radius: 26px;
+        padding: 26px 24px 18px 24px;
+        background:
+            radial-gradient(circle at 50% 0%, rgba(239,68,68,0.28), transparent 35%),
+            linear-gradient(180deg, rgba(24,24,37,0.97) 0%, rgba(17,24,39,0.98) 100%);
+        border: 1px solid rgba(248,113,113,0.45);
+        box-shadow:
+            0 0 0 1px rgba(248,113,113,0.18),
+            0 0 28px rgba(239,68,68,0.35),
+            0 0 70px rgba(239,68,68,0.22),
+            0 24px 80px rgba(0,0,0,0.40);
+        text-align: center;
+        pointer-events: none;
+    }
+
+    .critical-alert-icon {
+        font-size: 4rem;
+        line-height: 1;
+        margin-bottom: 0.55rem;
+        filter: drop-shadow(0 0 12px rgba(248,113,113,0.45));
+    }
+
+    .critical-alert-title {
+        color: #fca5a5 !important;
+        font-size: 1.42rem;
+        font-weight: 900;
+        letter-spacing: 0.4px;
+        margin-bottom: 0.18rem;
+        text-transform: uppercase;
+    }
+
+    .critical-alert-subtitle {
+        color: #ffffff !important;
+        font-size: 1.02rem;
+        font-weight: 800;
+        margin-bottom: 0.55rem;
+        letter-spacing: 0.12px;
+    }
+
+    .critical-alert-detail {
+        color: #e5e7eb !important;
+        font-size: 0.95rem;
+        line-height: 1.65;
+        margin: 0 auto 0.15rem auto;
+        max-width: 470px;
+    }
+
+    .critical-alert-close-note {
+        color: #fca5a5 !important;
+        font-size: 0.8rem;
+        margin-top: 0.8rem;
+        opacity: 0.95;
+    }
+
+    .critical-button-wrap {
+        position: fixed;
+        top: calc(50% + 155px);
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(92vw, 220px);
+        z-index: 999992;
+    }
+
+    .critical-button-wrap .stButton > button {
+        width: 100% !important;
+        height: 48px !important;
+        border-radius: 14px !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        background: linear-gradient(135deg, #374151, #1f2937) !important;
+        color: #f9fafb !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.22) !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -449,12 +532,234 @@ def fmt_int(value):
         return "-"
     return f"{int(value):,}".replace(",", ".")
 
+def build_filter_signature(selected_gender, selected_age, selected_edu, selected_ins, selected_medeni, selected_log_gelir):
+    return str({
+        "gender": selected_gender,
+        "age": selected_age,
+        "edu": selected_edu,
+        "ins": selected_ins,
+        "medeni": selected_medeni,
+        "gelir": selected_log_gelir
+    })
+
+def get_filter_context_text(selected_gender, selected_age, selected_edu, selected_ins, selected_medeni, selected_log_gelir):
+    parts = []
+
+    if selected_gender != "Tümü":
+        parts.append(f"cinsiyet={selected_gender}")
+    if selected_age is not None:
+        parts.append(f"yaş aralığı={selected_age[0]}-{selected_age[1]}")
+    if selected_edu != "Tümü":
+        parts.append(f"eğitim={selected_edu}")
+    if selected_ins != "Tümü":
+        parts.append(f"sigorta={selected_ins}")
+    if selected_medeni != "Tümü":
+        parts.append(f"medeni durum={selected_medeni}")
+    if selected_log_gelir is not None:
+        gelir_alt = int(np.expm1(selected_log_gelir[0]))
+        gelir_ust = int(np.expm1(selected_log_gelir[1]))
+        parts.append(f"yaklaşık gelir={fmt_int(gelir_alt)}-{fmt_int(gelir_ust)} TL")
+
+    if not parts:
+        return "genel görünümde"
+
+    return ", ".join(parts) + " seçimine göre"
+
+def open_data_alert(title, subtitle, detail):
+    st.session_state.alert_data = {
+        "title": title,
+        "subtitle": subtitle,
+        "detail": detail
+    }
+    st.session_state.alert_open = True
+
+def render_alert():
+    if not st.session_state.get("alert_open", False):
+        return
+
+    data = st.session_state.alert_data
+
+    st.markdown(
+        f"""
+        <div class="critical-overlay"></div>
+        <div class="critical-alert-modal">
+            <div class="critical-alert-icon">⚠️</div>
+            <div class="critical-alert-title">{data['title']}</div>
+            <div class="critical-alert-subtitle">{data['subtitle']}</div>
+            <div class="critical-alert-detail">{data['detail']}</div>
+            <div class="critical-alert-close-note">
+                Bu uyarı filtre değişikliği sonrası otomatik üretildi.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown('<div class="critical-button-wrap">', unsafe_allow_html=True)
+    if st.button("KAPAT", key="alert_close_btn", use_container_width=True):
+        st.session_state.alert_open = False
+        st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+def generate_filter_change_alert(filtered_df, filter_context):
+    if len(filtered_df) < 500:
+        return {
+            "title": "DİKKAT",
+            "subtitle": "FİLTRELENEN VERİ DARALDI",
+            "detail": (
+                f"{filter_context} analiz edilen kayıt sayısı {fmt_int(len(filtered_df))} seviyesine düştü. "
+                f"Grafikler daha dar bir grubu temsil ediyor olabilir."
+            )
+        }
+
+    if "DEGER" not in filtered_df.columns or not filtered_df["DEGER"].notna().any():
+        return None
+
+    deger = pd.to_numeric(filtered_df["DEGER"], errors="coerce").dropna()
+    if deger.empty:
+        return None
+
+    positive = deger[deger > 0]
+    if len(positive) >= 20:
+        q1 = positive.quantile(0.25)
+        q3 = positive.quantile(0.75)
+        iqr = q3 - q1
+        upper_bound = q3 + 1.5 * iqr
+        outlier_ratio = (positive > upper_bound).mean()
+
+        if outlier_ratio >= 0.12:
+            return {
+                "title": "DİKKAT",
+                "subtitle": "UÇ HARCAMA DEĞERLERİ ARTTI",
+                "detail": (
+                    f"{filter_context} olağan dışı yüksek sağlık harcaması oranı "
+                    f"%{outlier_ratio * 100:.1f} seviyesine çıktı. "
+                    f"Bu seçili grupta maliyet yoğunluğu artmış görünüyor."
+                )
+            }
+
+    avg_val = deger.mean()
+    med_val = deger.median()
+    std_val = deger.std()
+
+    if avg_val > 180:
+        return {
+            "title": "DİKKAT",
+            "subtitle": "ORTALAMA SAĞLIK HARCAMASI YÜKSELDİ",
+            "detail": (
+                f"{filter_context} ortalama sağlık harcaması {fmt_number(avg_val)} seviyesine çıktı. "
+                f"Seçili grubun harcama yükü genel yapıya göre daha yüksek görünüyor."
+            )
+        }
+
+    if med_val < 10 and avg_val > 100:
+        return {
+            "title": "DİKKAT",
+            "subtitle": "HARCAMA DAĞILIMI DENGESİZLEŞTİ",
+            "detail": (
+                f"{filter_context} medyan harcama {fmt_number(med_val)}, ortalama ise {fmt_number(avg_val)} oldu. "
+                f"Az sayıdaki yüksek harcama genel dağılımı yukarı çekiyor olabilir."
+            )
+        }
+
+    if std_val > 800:
+        return {
+            "title": "DİKKAT",
+            "subtitle": "HARCAMA OYNAKLIĞI ARTTI",
+            "detail": (
+                f"{filter_context} harcama değerlerinin standart sapması {fmt_number(std_val)} seviyesine yükseldi. "
+                f"Maliyet yapısı homojen görünmüyor."
+            )
+        }
+
+    if "HBS_KOD5" in filtered_df.columns:
+        temp = filtered_df[["HBS_KOD5", "DEGER"]].dropna().copy()
+        if not temp.empty:
+            temp["HARCAMA_KALEMI"] = temp["HBS_KOD5"].apply(lambda x: map_label(x, HBS_KOD5_MAP))
+            grouped = temp.groupby("HARCAMA_KALEMI")["DEGER"].sum().sort_values(ascending=False)
+            if len(grouped) > 0 and grouped.sum() > 0:
+                top_label = grouped.index[0]
+                share = grouped.iloc[0] / grouped.sum() * 100
+                if share >= 45:
+                    return {
+                        "title": "DİKKAT",
+                        "subtitle": "TEK HARCAMA KALEMİNDE YOĞUNLAŞMA VAR",
+                        "detail": (
+                            f"{filter_context} toplam sağlık harcamasının %{share:.1f}'i '{top_label}' kaleminde toplandı."
+                        )
+                    }
+
+    if "OKUL_BITEN" in filtered_df.columns:
+        edu_df = safe_mean(filtered_df, "OKUL_BITEN", "DEGER")
+        if len(edu_df) >= 2:
+            edu_df["EGITIM_ETIKET"] = edu_df["OKUL_BITEN"].apply(lambda x: map_label(x, OKUL_BITEN_MAP))
+            edu_top = edu_df.iloc[0]["EGITIM_ETIKET"]
+            edu_diff = edu_df.iloc[0]["DEGER"] - edu_df.iloc[-1]["DEGER"]
+            if edu_diff >= 120:
+                return {
+                    "title": "DİKKAT",
+                    "subtitle": "EĞİTİM GRUPLARI ARASINDA FARK VAR",
+                    "detail": (
+                        f"{filter_context} eğitim grupları arasında ortalama sağlık harcaması farkı yükseldi. "
+                        f"En yüksek grup: '{edu_top}'."
+                    )
+                }
+
+    if "SAGLIK_SIGORTA_1" in filtered_df.columns:
+        ins_df = safe_mean(filtered_df, "SAGLIK_SIGORTA_1", "DEGER")
+        if len(ins_df) >= 2:
+            ins_df["SIGORTA_ETIKET"] = ins_df["SAGLIK_SIGORTA_1"].apply(lambda x: map_label(x, SAGLIK_SIGORTA_MAP))
+            ins_top = ins_df.iloc[0]["SIGORTA_ETIKET"]
+            ins_diff = ins_df.iloc[0]["DEGER"] - ins_df.iloc[-1]["DEGER"]
+            if ins_diff >= 100:
+                return {
+                    "title": "DİKKAT",
+                    "subtitle": "SİGORTA TÜRÜNE GÖRE HARCAMA FARKI ARTTI",
+                    "detail": (
+                        f"{filter_context} sigorta türleri arasında belirgin sağlık harcaması farkı oluştu. "
+                        f"En yüksek grup: '{ins_top}'."
+                    )
+                }
+
+    if "LOG_GELIR_TOPLAM" in filtered_df.columns:
+        gelir_df = filtered_df[["LOG_GELIR_TOPLAM", "DEGER"]].dropna()
+        if len(gelir_df) >= 30:
+            corr_val = gelir_df["LOG_GELIR_TOPLAM"].corr(gelir_df["DEGER"])
+            if pd.notna(corr_val):
+                if corr_val >= 0.55:
+                    return {
+                        "title": "DİKKAT",
+                        "subtitle": "GELİR VE SAĞLIK HARCAMASI BAĞLANTISI GÜÇLÜ",
+                        "detail": (
+                            f"{filter_context} gelir ile sağlık harcaması arasında güçlü pozitif ilişki tespit edildi "
+                            f"(korelasyon: {corr_val:.2f})."
+                        )
+                    }
+                if corr_val <= -0.35:
+                    return {
+                        "title": "DİKKAT",
+                        "subtitle": "GELİR VE HARCAMA ARASINDA TERS YÖNLÜ İLİŞKİ VAR",
+                        "detail": (
+                            f"{filter_context} gelir ile sağlık harcaması arasında negatif yönlü güçlü ilişki tespit edildi "
+                            f"(korelasyon: {corr_val:.2f})."
+                        )
+                    }
+
+    return None
+
 # =========================================================
 # VERİ
 # =========================================================
 df = get_data()
 filtered_df = df.copy()
 active_filters = 0
+
+selected_gender = "Tümü"
+selected_age = None
+selected_edu = "Tümü"
+selected_ins = "Tümü"
+selected_medeni = "Tümü"
+selected_log_gelir = None
 
 # =========================================================
 # SIDEBAR
@@ -529,6 +834,40 @@ with st.sidebar:
         st.caption(f"Yaklaşık gelir aralığı: {fmt_int(gelir_alt)} - {fmt_int(gelir_ust)} TL")
 
 # =========================================================
+# FİLTRE DEĞİŞİMİ
+# =========================================================
+current_filter_signature = build_filter_signature(
+    selected_gender,
+    selected_age,
+    selected_edu,
+    selected_ins,
+    selected_medeni,
+    selected_log_gelir
+)
+
+filter_changed = st.session_state.last_filter_signature != current_filter_signature
+first_load = st.session_state.last_filter_signature is None
+
+if filter_changed and not first_load:
+    st.session_state.alert_open = False
+
+st.session_state.last_filter_signature = current_filter_signature
+
+filter_context = get_filter_context_text(
+    selected_gender,
+    selected_age,
+    selected_edu,
+    selected_ins,
+    selected_medeni,
+    selected_log_gelir
+)
+
+if filter_changed and not first_load:
+    alert = generate_filter_change_alert(filtered_df, filter_context)
+    if alert:
+        open_data_alert(alert["title"], alert["subtitle"], alert["detail"])
+
+# =========================================================
 # HERO
 # =========================================================
 st.markdown("""
@@ -540,6 +879,11 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# =========================================================
+# UYARI
+# =========================================================
+render_alert()
 
 # =========================================================
 # ÜST BİLGİ
@@ -669,10 +1013,7 @@ with main_left:
                 orientation="h"
             )
             fig_main = style_figure(fig_main, 470, title=title)
-            fig_main.update_traces(
-                marker_color=color,
-                marker_line_width=0
-            )
+            fig_main.update_traces(marker_color=color, marker_line_width=0)
             fig_main.update_yaxes(showgrid=False)
             fig_main.update_xaxes(showgrid=False)
             st.plotly_chart(fig_main, use_container_width=True, config={"displayModeBar": False})
