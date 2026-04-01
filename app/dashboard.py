@@ -940,8 +940,7 @@ st.markdown("""
 <div class="hero-card">
     <div class="hero-title">TÜİK Sağlık Harcaması Dashboard</div>
     <div class="hero-subtitle">
-        Sağlık harcama kalemleri ile sosyal ve ekonomik değişkenler arasındaki ilişkiyi;
-        etkileşimli filtreler, istatistiki özetler ve premium görselleştirmelerle inceleyen analitik panel.
+        Sağlık harcamalarını sosyal ve ekonomik göstergelerle birlikte analiz et.
     </div>
 </div>
 """, unsafe_allow_html=True)
