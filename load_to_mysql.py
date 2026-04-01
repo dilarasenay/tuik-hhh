@@ -3,89 +3,101 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
+# .env dosyasını yükle
 load_dotenv()
 
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_PORT = os.getenv("MYSQL_PORT")
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
-MYSQL_TABLE = os.getenv("MYSQL_TABLE")
-CSV_FILE = os.getenv("CSV_FILE")
+# ==========================================
+# ENV AYARLARI
+# ==========================================
+MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
+MYSQL_PORT = os.getenv("MYSQL_PORT", "3306")
+MYSQL_USER = os.getenv("MYSQL_USER", "root")
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
+MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "panel_db")
+MYSQL_TABLE = os.getenv("MYSQL_TABLE", "panel_data")
 
-engine = create_engine(
-    f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}"
-)
+# CSV yolu
+CSV_FILE = "data/panel_veri.csv"
 
-def make_unique_columns(columns):
-    seen = {}
-    new_cols = []
+# ==========================================
+# ENGINE
+# ==========================================
+def create_db_engine(with_database=True):
+    if with_database:
+        url = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}"
+    else:
+        url = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}"
+    return create_engine(url)
 
-    for col in columns:
-        col = str(col).strip()
-        col = col.replace(" ", "_")
-        col = "".join(ch for ch in col if ch.isalnum() or ch == "_")
-        col = col[:60]
+# ==========================================
+# DATABASE OLUŞTUR
+# ==========================================
+def ensure_database():
+    engine = create_db_engine(with_database=False)
+    with engine.connect() as conn:
+        conn.execute(
+            text(
+                f"CREATE DATABASE IF NOT EXISTS {MYSQL_DATABASE} "
+                "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+            )
+        )
+        conn.commit()
+    print(f"Veritabanı hazır: {MYSQL_DATABASE}")
 
-        if col in seen:
-            seen[col] += 1
-            col = f"{col}_{seen[col]}"
-        else:
-            seen[col] = 0
+# ==========================================
+# CSV OKU
+# ==========================================
+def read_csv_file():
+    if not os.path.exists(CSV_FILE):
+        raise FileNotFoundError(f"CSV dosyası bulunamadı: {CSV_FILE}")
 
-        new_cols.append(col)
+    df = pd.read_csv(CSV_FILE, low_memory=False)
+    df.columns = [col.strip().replace(" ", "_") for col in df.columns]
 
-    return new_cols
+    # Baştaki isimsiz index kolonu varsa sil
+    unnamed_cols = [col for col in df.columns if str(col).startswith("Unnamed")]
+    if unnamed_cols:
+        df = df.drop(columns=unnamed_cols)
 
-def optimize_dtypes(df: pd.DataFrame) -> pd.DataFrame:
-    for col in df.columns:
-        try:
-            if df[col].dtype == "int64":
-                df[col] = pd.to_numeric(df[col], downcast="integer")
-            elif df[col].dtype == "float64":
-                df[col] = pd.to_numeric(df[col], downcast="float")
-        except Exception:
-            pass
+    print(f"CSV okundu: {CSV_FILE}")
+    print(f"Satır sayısı: {df.shape[0]}")
+    print(f"Sütun sayısı: {df.shape[1]}")
+    print("İlk 10 sütun:", df.columns[:10].tolist())
+
     return df
 
-def main():
-    print("CSV okunuyor...")
-    df = pd.read_csv(CSV_FILE, low_memory=False)
-
-    if "Unnamed: 0" in df.columns:
-        df = df.drop(columns=["Unnamed: 0"])
-
-    # Kolon isimlerini temizle + benzersiz yap
-    df.columns = make_unique_columns(df.columns)
-
-    # Tamamen boş kolonları sil
-    df = df.dropna(axis=1, how="all")
-
-    df = optimize_dtypes(df)
-
-    print(f"Satır sayısı: {df.shape[0]}")
-    print(f"Kolon sayısı: {df.shape[1]}")
-
-    print("İlk 15 kolon:")
-    print(df.columns[:15].tolist())
-
-    print("MySQL'e yazılıyor...")
+# ==========================================
+# MYSQL'E YÜKLE
+# ==========================================
+def load_to_mysql():
+    ensure_database()
+    df = read_csv_file()
+    engine = create_db_engine(with_database=True)
 
     df.to_sql(
         name=MYSQL_TABLE,
         con=engine,
-        if_exists="replace",
+        if_exists="replace",   # tablo varsa silip yeniden oluşturur
         index=False,
-        chunksize=5000,
+        chunksize=10000,
         method="multi"
     )
 
-    print("Aktarım tamamlandı.")
+    print(f"Veri başarıyla yüklendi.")
+    print(f"Tablo adı: {MYSQL_TABLE}")
 
+    # kontrol
     with engine.connect() as conn:
         result = conn.execute(text(f"SELECT COUNT(*) FROM {MYSQL_TABLE}"))
-        total = result.scalar()
-        print(f"MySQL içindeki toplam kayıt: {total}")
+        count = result.scalar()
+        print(f"MySQL içindeki toplam kayıt sayısı: {count}")
 
+# ==========================================
+# MAIN
+# ==========================================
 if __name__ == "__main__":
-    main()
+    try:
+        load_to_mysql()
+    except Exception as e:
+        print("HATA OLUŞTU:")
+        print(e)
