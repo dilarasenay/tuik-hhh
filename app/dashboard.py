@@ -413,7 +413,6 @@ st.markdown("""
         border-radius: 999px;
     }
 
-    /* Gerçek çalışan X butonu */
     div[data-testid="stButton"]:has(> button[kind="secondary"]) {
         position: fixed !important;
         top: calc(50% - 132px) !important;
@@ -449,26 +448,32 @@ st.markdown("""
 # =========================================================
 @st.cache_data
 def get_data():
-    df = load_data().copy()
+    try:
+        df = load_data().copy()
 
-    numeric_cols = [
-        "DEGER", "YAS", "CINSIYET", "OKUL_BITEN",
-        "SAGLIK_SIGORTA_1", "HBS_KOD5", "GELIR_TOPLAM", "MEDENI_DURUM"
-    ]
+        numeric_cols = [
+            "DEGER", "YAS", "CINSIYET", "OKUL_BITEN",
+            "SAGLIK_SIGORTA_1", "HBS_KOD5", "GELIR_TOPLAM", "MEDENI_DURUM"
+        ]
 
-    for col in numeric_cols:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
+        for col in numeric_cols:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    if "GELIR_TOPLAM" in df.columns:
-        df.loc[df["GELIR_TOPLAM"] < 0, "GELIR_TOPLAM"] = np.nan
-        df["LOG_GELIR_TOPLAM"] = np.where(
-            df["GELIR_TOPLAM"].notna(),
-            np.log1p(df["GELIR_TOPLAM"]),
-            np.nan
-        )
+        if "GELIR_TOPLAM" in df.columns:
+            df.loc[df["GELIR_TOPLAM"] < 0, "GELIR_TOPLAM"] = np.nan
+            df["LOG_GELIR_TOPLAM"] = np.where(
+                df["GELIR_TOPLAM"].notna(),
+                np.log1p(df["GELIR_TOPLAM"]),
+                np.nan
+            )
 
-    return df
+        return df
+
+    except Exception as e:
+        st.error("Veri yüklenemedi.")
+        st.exception(e)
+        return pd.DataFrame()
 
 def map_label(value, mapping):
     if pd.isna(value):
